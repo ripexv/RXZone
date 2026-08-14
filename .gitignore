@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# Xcode — user-specific state, never shared
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xcscmblueprint
+*.xccheckout
+
+# Build products
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+Packages/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Obj-C / Swift legacy
+*.hmap
+*.o
+
+# Signing — keep private material out of the repo
+*.p12
+*.mobileprovision
+*.provisionprofile
