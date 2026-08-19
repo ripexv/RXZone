@@ -195,6 +195,16 @@ final class AppModel {
         return prefix + menuBarRows.map(menuBarClock(for:)).joined(separator: "   ")
     }
 
+    /// Time zones the menu bar is currently displaying.
+    ///
+    /// Keyed by zone rather than by row id on purpose. The pinned local row and
+    /// a saved row for the same zone show the same clock, and only one of them
+    /// survives de-duplication — but the user is matching *times*, so whichever
+    /// row they can see should be the one marked.
+    var menuBarZoneIdentifiers: Set<String> {
+        Set(menuBarRows.map(\.timeZone.identifier))
+    }
+
     /// The same clocks as one spoken phrase per zone.
     var menuBarAccessibilityText: String {
         menuBarRows

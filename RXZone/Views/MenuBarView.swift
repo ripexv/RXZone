@@ -59,6 +59,8 @@ struct MenuBarView: View {
                 // control itself already states the offset.
                 if model.isTimeTravelling, !model.preferences.showsTimeTravel { travelBanner }
 
+                let inMenuBar = model.menuBarZoneIdentifiers
+
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(rows) { row in
@@ -66,9 +68,10 @@ struct MenuBarView: View {
                                 row: row,
                                 date: model.displayDate,
                                 reference: model.referenceTimeZone,
-                                preferences: model.preferences
+                                preferences: model.preferences,
+                                isInMenuBar: inMenuBar.contains(row.timeZone.identifier)
                             )
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 8)
                             .contextMenu {
                                 Toggle(isOn: Binding(
                                     get: { model.showsInMenuBar(row.id) },

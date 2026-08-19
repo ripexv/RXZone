@@ -230,6 +230,68 @@ struct SystemZoneTests {
     }
 }
 
+@Suite("Menu bar highlighting")
+struct MenuBarHighlightTests {
+
+    @Test("Only the zones actually in the menu bar are marked")
+    func marksWhatIsUpThere() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = []
+        model.addZone(identifier: "America/Los_Angeles")
+        model.addZone(identifier: "Europe/London")
+        let london = model.preferences.zones.last!
+        model.setShowsInMenuBar(false, for: london.id)
+        model.setShowsInMenuBar(false, for: ZoneRow.localRowID)
+
+        let marked = model.menuBarZoneIdentifiers
+        #expect(marked.contains("America/Los_Angeles"))
+        #expect(!marked.contains("Europe/London"))
+    }
+
+    @Test("Every clock in the menu bar has a matching mark")
+    func markingCoversTheMenuBar() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        let marked = model.menuBarZoneIdentifiers
+        for row in model.menuBarRows {
+            #expect(marked.contains(row.timeZone.identifier),
+                    "\(row.title) is in the menu bar but would not be highlighted")
+        }
+    }
+
+    @Test("A de-duplicated local clock still marks the row that shows its time")
+    func dedupedLocalStillMarksAVisibleRow() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        // Only the pinned local row is in the menu bar, while the same zone is
+        // also saved — so the pinned row is the one that gets de-duplicated.
+        model.preferences.zones = [TimeZoneItem(identifier: TimeZone.current.identifier)]
+        model.preferences.menuBarZoneIDs = [ZoneRow.localRowID]
+
+        let marked = model.menuBarZoneIdentifiers
+        let visible = model.rows.filter { marked.contains($0.timeZone.identifier) }
+        #expect(!visible.isEmpty, "The menu bar shows a clock, so some visible row must be marked")
+    }
+
+    @Test("Nothing is marked when the menu bar shows a zone that is not listed")
+    func unlistedZoneMarksNothing() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: "Pacific/Auckland")]
+        model.preferences.showsLocalZone = false
+        model.preferences.menuBarZoneIDs = [ZoneRow.localRowID]
+
+        // The menu bar shows this Mac's zone, but the user hid that row.
+        #expect(model.menuBarZoneIdentifiers == [TimeZone.current.identifier])
+        #expect(!model.rows.contains { $0.timeZone.identifier == TimeZone.current.identifier })
+    }
+}
+
 @Suite("Picker duplicate detection")
 struct TrackingKeyTests {
 

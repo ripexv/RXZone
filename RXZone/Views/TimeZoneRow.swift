@@ -11,6 +11,9 @@ struct TimeZoneRow: View {
     let date: Date
     let reference: TimeZone
     let preferences: Preferences
+    /// Tints the row when this clock is one of the ones in the menu bar, so a
+    /// glance at the panel answers "which of these am I looking at up there?"
+    let isInMenuBar: Bool
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -58,9 +61,17 @@ struct TimeZoneRow: View {
                 }
             }
         }
-        .padding(.vertical, 3)
+        .padding(.vertical, 5)
+        .padding(.horizontal, 6)
+        .background(
+            isInMenuBar ? Color.accentColor.opacity(0.12) : .clear,
+            in: .rect(cornerRadius: 6)
+        )
         .opacity(row.isAvailable ? 1 : 0.5)
         .contentShape(.rect)
+        .help(isInMenuBar
+              ? String(localized: "Shown in the menu bar", comment: "Tooltip on a highlighted row")
+              : "")
         // Read as a single sentence by VoiceOver instead of five fragments.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
@@ -100,6 +111,10 @@ struct TimeZoneRow: View {
     private var accessibilityLabel: Text {
         var spoken = "\(row.title), \(timeText), \(detail)"
         if let dayLabel { spoken += ", \(dayLabel)" }
+        if isInMenuBar {
+            spoken += ", " + String(localized: "shown in the menu bar",
+                                    comment: "Spoken for a row mirrored into the menu bar")
+        }
         if !row.isAvailable {
             spoken += ", " + String(localized: "unavailable", comment: "Spoken for an unknown time zone")
         }
