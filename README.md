@@ -22,6 +22,22 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 - **12/24-hour clock**, following the system setting by default.
 - **Drag to reorder**, launch at login via `SMAppService`, and an optional global shortcut.
 
+## Install
+
+Download `RXZone.app.zip` from the [latest release](https://github.com/ripexv/RXZone/releases/latest),
+unzip it, and drag **RXZone** into your Applications folder. macOS 14 or later.
+
+This build is not signed with an Apple Developer ID, so the first launch shows
+*"Apple could not verify RXZone is free of malware."* That is Gatekeeper
+reacting to the missing signature, not to anything the app does. To open it:
+
+1. Double-click RXZone and dismiss the warning.
+2. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.
+3. Confirm.
+
+macOS remembers the decision, so later launches open straight away. Building from
+source avoids the prompt entirely — locally built apps are never quarantined.
+
 ## Privacy
 
 RXZone makes no network requests. That is a property of the build, not a promise:
@@ -41,11 +57,9 @@ grep -rn "URLSession\|URLRequest\|NWConnection\|analytics" RXZone --include="*.s
 codesign -d --entitlements - /Applications/RXZone.app
 ```
 
-## Requirements
-
-macOS 14 or later. Built with Xcode 26.
-
 ## Building
+
+Xcode 26, no dependencies to fetch:
 
 ```bash
 xcodebuild -project RXZone.xcodeproj -scheme RXZone -configuration Release build
