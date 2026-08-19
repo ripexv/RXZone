@@ -364,24 +364,12 @@ private struct MenuBarSettingsView: View {
         .disabled(!model.preferences.menuBarStyle.showsTime)
     }
 
+    /// Rendered by the model, not rebuilt here — a preview that assembled its
+    /// own string could quietly disagree with the real menu bar.
     private var preview: String {
-        guard model.preferences.menuBarStyle != .icon else {
-            return String(localized: "Globe icon", comment: "Menu bar preview for icon-only mode")
-        }
-        return model.menuBarRows.map { row in
-            let time = DateFormatting.timeString(
-                for: model.displayDate,
-                in: row.timeZone,
-                format: model.preferences.timeFormat,
-                showsSeconds: model.preferences.menuBarShowsSeconds
-            )
-            return switch model.preferences.menuBarStyle {
-            case .icon, .time: time
-            case .symbolAndTime: "\(row.symbol) \(time)"
-            case .labelAndTime: "\(row.title) \(time)"
-            }
-        }
-        .joined(separator: "   ")
+        model.preferences.menuBarStyle == .icon
+            ? String(localized: "Globe icon", comment: "Menu bar preview for icon-only mode")
+            : model.menuBarText
     }
 }
 

@@ -180,6 +180,47 @@ final class AppModel {
         return rows.isEmpty ? [localRow] : rows
     }
 
+    // MARK: - Menu bar rendering
+
+    /// The exact string the status item draws.
+    ///
+    /// The Settings preview renders this same value rather than rebuilding it,
+    /// so a preview can never promise something the menu bar does not show.
+    /// Empty for the icon-only style, which callers draw as an image instead.
+    var menuBarText: String {
+        guard preferences.menuBarStyle != .icon else { return "" }
+        // A leading marker makes an active time travel offset obvious even
+        // while the popover is closed.
+        let prefix = isTimeTravelling ? "⏱ " : ""
+        return prefix + menuBarRows.map(menuBarClock(for:)).joined(separator: "   ")
+    }
+
+    /// The same clocks as one spoken phrase per zone.
+    var menuBarAccessibilityText: String {
+        menuBarRows
+            .map { "\($0.title) \(menuBarTime(for: $0))" }
+            .joined(separator: ", ")
+    }
+
+    private func menuBarTime(for row: ZoneRow) -> String {
+        DateFormatting.timeString(
+            for: displayDate,
+            in: row.timeZone,
+            format: preferences.timeFormat,
+            showsSeconds: preferences.menuBarShowsSeconds
+        )
+    }
+
+    private func menuBarClock(for row: ZoneRow) -> String {
+        let time = menuBarTime(for: row)
+        return switch preferences.menuBarStyle {
+        case .icon: ""
+        case .time: time
+        case .symbolAndTime: "\(row.symbol) \(time)"
+        case .labelAndTime: "\(row.title) \(time)"
+        }
+    }
+
     /// Whether a row is currently visible in the menu bar, taking the implicit
     /// local-only default into account.
     func showsInMenuBar(_ id: UUID) -> Bool {

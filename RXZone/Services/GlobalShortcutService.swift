@@ -139,6 +139,11 @@ final class GlobalShortcutService {
         )
     }
 
+    /// Releases the hot key but deliberately leaves the event handler installed.
+    ///
+    /// Events reach us only through a registered hot key, so an idle handler
+    /// never fires. Keeping it avoids tearing down and rebuilding it every time
+    /// the user tries a different combination.
     private func unregister() {
         if let hotKeyRef {
             UnregisterEventHotKey(hotKeyRef)
@@ -157,10 +162,6 @@ enum MenuBarPresenter {
     static func toggle() {
         statusBarButton()?.performClick(nil)
     }
-
-    /// True when the status item has been found — used to keep the shortcut
-    /// setting from advertising something that cannot work.
-    static var canToggle: Bool { statusBarButton() != nil }
 
     private static func statusBarButton() -> NSStatusBarButton? {
         for window in NSApplication.shared.windows {

@@ -16,8 +16,6 @@ nonisolated enum TimeZoneCatalog {
         let identifier: String
         /// Localized exemplar city, e.g. `Istanbul`
         let city: String
-        /// Area component of the identifier, e.g. `Europe`
-        let area: String
         /// Localized country name, e.g. `Türkiye`. Empty when unknown.
         let country: String
         /// Flag emoji, or a globe when the region is unknown.
@@ -115,6 +113,8 @@ nonisolated enum TimeZoneCatalog {
                 city = derivedCityName(for: identifier)
             }
 
+            // Searchable but not displayed: the area lets "europe" or "pacific"
+            // narrow the list without needing a column of its own.
             let area = identifier.contains("/") ? String(identifier.split(separator: "/")[0]) : ""
             let regionCode = TimeZoneRegions.regionCodeByIdentifier[identifier]
             let country = regionCode.flatMap { locale.localizedString(forRegionCode: $0) } ?? ""
@@ -129,7 +129,6 @@ nonisolated enum TimeZoneCatalog {
             return Entry(
                 identifier: identifier,
                 city: city,
-                area: area,
                 country: country,
                 symbol: symbol,
                 aliases: aliases,

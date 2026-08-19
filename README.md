@@ -56,7 +56,7 @@ The app is an `LSUIElement` agent: it has no Dock icon and no main window.
 xcodebuild test -project RXZone.xcodeproj -scheme RXZone -destination 'platform=macOS'
 ```
 
-85 tests written with Swift Testing, covering the parts most likely to be subtly
+91 tests written with Swift Testing, covering the parts most likely to be subtly
 wrong rather than the parts easiest to reach:
 
 - **Daylight saving** — New York shifting an hour between January and July, Sydney inverting the season, Istanbul holding a fixed offset, and offset labels tracking the date rather than a cached value.
@@ -89,8 +89,14 @@ RXZone/
 │                                AddTimeZoneView, TimeTravelControl, SettingsView
 └── Utilities/
     ├── DateFormatting.swift     Time/date/offset rendering
+    ├── TimeZoneAliases.swift    Search aliases for places the tz database omits
     └── TimeZoneRegions.swift    Generated zone → ISO region map (flags only)
 ```
+
+`Design/` sits outside the app target and holds the icon: two layered SVGs and
+`RenderIcon.swift`, an AppKit exporter that draws the same geometry and writes
+all ten macOS sizes. The SVGs stay the source of truth, and every size is
+reproducible from them.
 
 Two design points worth calling out:
 

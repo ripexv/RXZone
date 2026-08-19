@@ -39,12 +39,10 @@ struct TimeZoneRow: View {
                             .imageScale(.small)
                     }
                 }
-                if let detail {
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
 
             Spacer(minLength: 8)
@@ -79,8 +77,10 @@ struct TimeZoneRow: View {
         )
     }
 
-    /// Secondary line: the date, the offset from local, or both.
-    private var detail: String? {
+    /// Secondary line: the date, the offset from local, or both — falling back
+    /// to the zone's own name when the user has switched both off, so the row
+    /// never loses its second line entirely.
+    private var detail: String {
         var parts: [String] = []
         if preferences.showsDate {
             parts.append(DateFormatting.dateString(for: date, in: row.timeZone))
@@ -88,7 +88,6 @@ struct TimeZoneRow: View {
         if preferences.showsOffsetFromLocal, !row.isLocal {
             parts.append(DateFormatting.offsetLabel(of: row.timeZone, from: reference, at: date))
         }
-        if parts.isEmpty, row.isLocal { return row.subtitle }
         return parts.isEmpty ? row.subtitle : parts.joined(separator: " · ")
     }
 
@@ -99,8 +98,7 @@ struct TimeZoneRow: View {
     }
 
     private var accessibilityLabel: Text {
-        var spoken = "\(row.title), \(timeText)"
-        if let detail { spoken += ", \(detail)" }
+        var spoken = "\(row.title), \(timeText), \(detail)"
         if let dayLabel { spoken += ", \(dayLabel)" }
         if !row.isAvailable {
             spoken += ", " + String(localized: "unavailable", comment: "Spoken for an unknown time zone")

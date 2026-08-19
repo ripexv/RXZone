@@ -82,7 +82,9 @@ nonisolated struct Preferences: Codable, Equatable, Sendable {
     var zones: [TimeZoneItem] = TimeZoneItem.starterZones
     var timeFormat: TimeFormat = .system
 
-    /// Show a pinned row for the Mac's own time zone at the top of the list.
+    /// Offer a row for the Mac's own time zone at the top of the list. It is
+    /// still hidden when that zone is already tracked, and still shown while
+    /// time travelling, both of which override this.
     var showsLocalZone: Bool = true
     /// Show the weekday and date under each time.
     var showsDate: Bool = true
