@@ -84,6 +84,19 @@ nonisolated struct TimeZoneItem: Identifiable, Codable, Hashable, Sendable {
     var displaySymbol: String {
         symbol.isEmpty ? TimeZoneCatalog.suggestedSymbol(for: identifier) : symbol
     }
+
+    /// What "already added" means in the picker.
+    ///
+    /// Deliberately the identifier *and* the displayed name: several places
+    /// share one zone, so tracking New York must not mark Washington DC as
+    /// already added. They are the same zone but not the same row.
+    static func trackingKey(identifier: String, title: String) -> String {
+        "\(identifier)\u{1F}\(title.lowercased())"
+    }
+
+    var trackingKey: String {
+        Self.trackingKey(identifier: identifier, title: title)
+    }
 }
 
 nonisolated extension TimeZoneItem {

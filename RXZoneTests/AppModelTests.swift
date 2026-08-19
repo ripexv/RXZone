@@ -203,6 +203,82 @@ struct LocalRowTests {
     }
 }
 
+@Suite("System zone marking")
+struct SystemZoneTests {
+
+    @Test("A saved zone matching this Mac is marked as the system one")
+    func trackedZoneIsMarked() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [
+            TimeZoneItem(identifier: TimeZone.current.identifier),
+            TimeZoneItem(identifier: TimeZone.current.identifier == "Asia/Tokyo" ? "Europe/London" : "Asia/Tokyo"),
+        ]
+        let marked = model.rows.filter(\.isSystemZone)
+        #expect(marked.count == 1, "Exactly one row should carry the marker")
+        #expect(marked.first?.isLocal == false, "It should be the saved row, not a pinned duplicate")
+    }
+
+    @Test("Other zones are not marked")
+    func otherZonesAreNotMarked() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: "Pacific/Auckland")]
+        #expect(!model.rows.contains { !$0.isLocal && $0.isSystemZone })
+    }
+}
+
+@Suite("Picker duplicate detection")
+struct TrackingKeyTests {
+
+    @Test("A zone added under one name leaves other names available")
+    func aliasNameIsStillAddable() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: "America/New_York")]
+
+        // Washington DC shares New York's zone but is a different row.
+        let washington = TimeZoneItem.trackingKey(
+            identifier: "America/New_York", title: "Washington DC")
+        #expect(!model.trackedKeys.contains(washington),
+                "Tracking New York must not mark Washington DC as already added")
+
+        // The zone under its own name is genuinely taken.
+        let newYork = TimeZoneItem.trackingKey(
+            identifier: "America/New_York", title: "New York")
+        #expect(model.trackedKeys.contains(newYork))
+    }
+
+    @Test("Adding under an alias makes that name taken, not the city's")
+    func addingAliasMarksOnlyThatName() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = []
+        model.addZone(identifier: "America/New_York", customLabel: "Washington DC")
+
+        #expect(model.trackedKeys.contains(
+            TimeZoneItem.trackingKey(identifier: "America/New_York", title: "Washington DC")))
+        #expect(!model.trackedKeys.contains(
+            TimeZoneItem.trackingKey(identifier: "America/New_York", title: "New York")))
+    }
+
+    @Test("The key ignores capitalisation so one name is not added twice")
+    func keyIsCaseInsensitive() {
+        #expect(TimeZoneItem.trackingKey(identifier: "Europe/London", title: "Bristol")
+                == TimeZoneItem.trackingKey(identifier: "Europe/London", title: "BRISTOL"))
+    }
+
+    @Test("The same name under different zones stays distinct")
+    func keyIncludesTheZone() {
+        #expect(TimeZoneItem.trackingKey(identifier: "Europe/London", title: "Portland")
+                != TimeZoneItem.trackingKey(identifier: "America/Los_Angeles", title: "Portland"))
+    }
+}
+
 @Suite("Time travel")
 struct TimeTravelTests {
 

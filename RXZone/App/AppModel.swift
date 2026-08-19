@@ -20,6 +20,10 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     let title: String
     let subtitle: String
     let isLocal: Bool
+    /// True when this row runs on the Mac's own time zone. Set on the pinned
+    /// local row and on any saved zone that happens to match it, so the marker
+    /// survives when the pinned row is de-duplicated away.
+    let isSystemZone: Bool
     /// `false` when the stored identifier is unknown to this macOS version.
     let isAvailable: Bool
 
@@ -122,7 +126,7 @@ final class AppModel {
         if (preferences.showsLocalZone || isTimeTravelling), !localZoneIsTracked {
             rows.append(localRow)
         }
-        rows.append(contentsOf: preferences.zones.map { Self.row(for: $0) })
+        rows.append(contentsOf: preferences.zones.map { row(for: $0) })
         return rows
     }
 
@@ -135,11 +139,12 @@ final class AppModel {
             title: String(localized: "This Mac", comment: "Row for the Mac's own time zone"),
             subtitle: TimeZoneCatalog.cityName(for: zone.identifier),
             isLocal: true,
+            isSystemZone: true,
             isAvailable: true
         )
     }
 
-    private static func row(for item: TimeZoneItem) -> ZoneRow {
+    private func row(for item: TimeZoneItem) -> ZoneRow {
         ZoneRow(
             id: item.id,
             timeZone: item.resolvedTimeZone,
@@ -149,6 +154,7 @@ final class AppModel {
                 ? item.subtitle
                 : String(localized: "Unavailable on this Mac", comment: "Time zone identifier is unknown"),
             isLocal: false,
+            isSystemZone: item.identifier == clock.localTimeZone.identifier,
             isAvailable: item.isAvailable
         )
     }
@@ -167,7 +173,7 @@ final class AppModel {
            !selected.contains(where: { $0.identifier == clock.localTimeZone.identifier }) {
             rows.append(localRow)
         }
-        rows += selected.map { Self.row(for: $0) }
+        rows += selected.map { row(for: $0) }
 
         // An empty selection means "not configured yet" rather than "blank
         // status item", so the local clock stands in.
@@ -233,9 +239,10 @@ final class AppModel {
         preferences.zones[index] = item
     }
 
-    /// Identifiers already tracked, so the picker can mark them as added.
-    var trackedIdentifiers: Set<String> {
-        Set(preferences.zones.map(\.identifier))
+    /// Rows already tracked, keyed by zone plus displayed name, so the picker
+    /// only marks as added what the user actually added under that name.
+    var trackedKeys: Set<String> {
+        Set(preferences.zones.map(\.trackingKey))
     }
 
     // MARK: - Clock rate

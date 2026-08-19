@@ -19,7 +19,7 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             if isAdding {
                 AddTimeZoneView(
-                    trackedIdentifiers: model.trackedIdentifiers,
+                    trackedKeys: model.trackedKeys,
                     referenceDate: model.displayDate,
                     timeFormat: model.preferences.timeFormat,
                     onSelect: { model.addZone(identifier: $0, customLabel: $1 ?? "") },

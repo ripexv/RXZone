@@ -10,7 +10,8 @@ import SwiftUI
 /// Used inline inside the popover and as a sheet in Settings, so it takes plain
 /// values and callbacks rather than reaching into `AppModel` directly.
 struct AddTimeZoneView: View {
-    let trackedIdentifiers: Set<String>
+    /// Keys of rows the user already has, from `TimeZoneItem.trackingKey`.
+    let trackedKeys: Set<String>
     let referenceDate: Date
     let timeFormat: TimeFormat
     /// Receives the zone identifier plus, when the match came from an alias,
@@ -92,12 +93,15 @@ struct AddTimeZoneView: View {
     }
 
     private func resultRow(_ entry: TimeZoneCatalog.Entry) -> some View {
-        let isTracked = trackedIdentifiers.contains(entry.identifier)
         // When the query matched an alias, lead with the place the user asked
         // for and say plainly whose zone it shares. Nothing here invents a time
         // zone — the identifier stays exactly what Foundation gave us.
         let alias = TimeZoneCatalog.matchedAlias(for: entry, query: query)
         let title = alias ?? entry.city
+        // Keyed by name as well as zone: having New York does not mean the user
+        // already has Washington DC, even though the two share a zone.
+        let isTracked = trackedKeys.contains(
+            TimeZoneItem.trackingKey(identifier: entry.identifier, title: title))
 
         return Button {
             onSelect(entry.identifier, alias)

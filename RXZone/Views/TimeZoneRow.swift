@@ -24,6 +24,15 @@ struct TimeZoneRow: View {
                     Text(row.title)
                         .fontWeight(.medium)
                         .lineLimit(1)
+                    // The dedicated "This Mac" row is dropped when its zone is
+                    // already tracked, so mark the surviving row instead of
+                    // losing the information entirely.
+                    if row.isSystemZone, !row.isLocal {
+                        Image(systemName: "laptopcomputer")
+                            .imageScale(.small)
+                            .foregroundStyle(.secondary)
+                            .help(Text("This Mac’s time zone", comment: "Tooltip on the system zone row"))
+                    }
                     if !row.isAvailable {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
