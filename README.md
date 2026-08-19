@@ -4,9 +4,12 @@ A native macOS menu bar app for tracking several time zones at once — offline,
 
 Built with Swift and SwiftUI (`MenuBarExtra`), no third-party dependencies.
 
-<!-- PREVIEW -->
+<!-- Bare URL on its own line: GitHub turns it into an inline player. Wrapping
+     it in link or image syntax breaks the embed. -->
 
+https://github.com/user-attachments/assets/b6678994-49e3-457a-a8ee-05b50d98c6d2
 
+*Several clocks in the menu bar, the popover with dates and offsets, the time travel slider, and adding a zone by searching for a city.*
 
 ## Features
 
