@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    RXZone app icon — background layer for Icon Composer.
+    A full-bleed square: Icon Composer clips it to the platform's icon shape,
+    so no corner rounding is applied here.
+
+    The diagonal runs from a late-evening indigo to a daylight blue, which is
+    the whole point of the app in one gradient.
+  -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"    stop-color="#3B2FB5"/>
+      <stop offset="0.55" stop-color="#2563D9"/>
+      <stop offset="1"    stop-color="#22A8E8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#sky)"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    RXZone app icon — foreground layer for Icon Composer.
+    Transparent background: Icon Composer supplies the squircle and the
+    material treatment. Import this as the top layer.
+
+    Two levels of detail on purpose. At 16 pt only the bezel and the hands
+    survive, so it reads as a clock. At full size the meridian and equator
+    come through and it reads as a globe. The globe lines are held at 55%
+    opacity so they never compete with the hands at small sizes.
+  -->
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+
+    <!-- Globe: meridian and equator, recessive.
+         The equator is inset rather than run edge to edge, and sits lower in
+         the stack than the hands, so the centre stays clean where the two
+         hands meet. Below ~32 pt these fade into a tint and the clock wins. -->
+    <ellipse cx="512" cy="512" rx="146" ry="318" stroke-opacity="0.5" stroke-width="38"/>
+    <path d="M 268 512 H 756" stroke-opacity="0.34" stroke-width="38"/>
+
+    <!-- Bezel: the shape that carries the icon at small sizes -->
+    <circle cx="512" cy="512" r="318" stroke-width="56"/>
+
+    <!-- Hands at 10:10 — the most legible clock reading there is -->
+    <g stroke-width="54">
+      <path d="M 512 512 L 365 427"/>
+      <path d="M 512 512 L 711 397"/>
+    </g>
+  </g>
+
+  <circle cx="512" cy="512" r="40" fill="#FFFFFF"/>
+</svg>

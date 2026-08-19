@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 400" width="1240" height="400">
+  <!--
+    Composed preview only — not an import target.
+    Shows the two layers together at 256, 128, 64, 32 and 16 pt so the
+    small-size legibility can be judged before committing to the artwork.
+  -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"    stop-color="#3B2FB5"/>
+      <stop offset="0.55" stop-color="#2563D9"/>
+      <stop offset="1"    stop-color="#22A8E8"/>
+    </linearGradient>
+
+    <!-- One instance of the glyph, reused at every size -->
+    <g id="glyph">
+      <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+
+    <!-- Globe: meridian and equator, recessive.
+         The equator is inset rather than run edge to edge, and sits lower in
+         the stack than the hands, so the centre stays clean where the two
+         hands meet. Below ~32 pt these fade into a tint and the clock wins. -->
+    <ellipse cx="512" cy="512" rx="146" ry="318" stroke-opacity="0.5" stroke-width="38"/>
+    <path d="M 268 512 H 756" stroke-opacity="0.34" stroke-width="38"/>
+
+    <!-- Bezel: the shape that carries the icon at small sizes -->
+    <circle cx="512" cy="512" r="318" stroke-width="56"/>
+
+    <!-- Hands at 10:10 — the most legible clock reading there is -->
+    <g stroke-width="54">
+      <path d="M 512 512 L 365 427"/>
+      <path d="M 512 512 L 711 397"/>
+    </g>
+  </g>
+      <circle cx="512" cy="512" r="40" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Approximates the macOS icon shape; Icon Composer draws the real one -->
+    <clipPath id="squircle" clipPathUnits="objectBoundingBox">
+      <path d="M0.5,0 C0.13,0 0,0.13 0,0.5 C0,0.87 0.13,1 0.5,1 C0.87,1 1,0.87 1,0.5 C1,0.13 0.87,0 0.5,0 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1240" height="400" fill="#F2F2F7"/>
+
+  <!-- 256 -->
+  <g transform="translate(40,40)">
+    <g clip-path="url(#squircle)">
+      <rect width="256" height="256" fill="url(#sky)"/>
+      <use href="#glyph" transform="scale(0.25)"/>
+    </g>
+    <text x="128" y="292" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">256 pt</text>
+  </g>
+
+  <!-- 128 -->
+  <g transform="translate(340,104)">
+    <g clip-path="url(#squircle)">
+      <rect width="128" height="128" fill="url(#sky)"/>
+      <use href="#glyph" transform="scale(0.125)"/>
+    </g>
+    <text x="64" y="228" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">128 pt</text>
+  </g>
+
+  <!-- 64 -->
+  <g transform="translate(510,136)">
+    <g clip-path="url(#squircle)">
+      <rect width="64" height="64" fill="url(#sky)"/>
+      <use href="#glyph" transform="scale(0.0625)"/>
+    </g>
+    <text x="32" y="196" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">64 pt</text>
+  </g>
+
+  <!-- 32 -->
+  <g transform="translate(614,152)">
+    <g clip-path="url(#squircle)">
+      <rect width="32" height="32" fill="url(#sky)"/>
+      <use href="#glyph" transform="scale(0.03125)"/>
+    </g>
+    <text x="16" y="180" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">32 pt</text>
+  </g>
+
+  <!-- 16 -->
+  <g transform="translate(682,160)">
+    <g clip-path="url(#squircle)">
+      <rect width="16" height="16" fill="url(#sky)"/>
+      <use href="#glyph" transform="scale(0.015625)"/>
+    </g>
+    <text x="8" y="172" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">16 pt</text>
+  </g>
+
+  <!-- Monochrome check: how the glyph holds up with no colour to lean on -->
+  <g transform="translate(760,40)">
+    <g clip-path="url(#squircle)">
+      <rect width="256" height="256" fill="#1C1C1E"/>
+      <use href="#glyph" transform="scale(0.25)"/>
+    </g>
+    <text x="128" y="292" font-family="-apple-system, Helvetica, sans-serif" font-size="20" fill="#6B6B70" text-anchor="middle">monochrome</text>
+  </g>
+</svg>
