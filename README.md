@@ -24,18 +24,17 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 
 ## Privacy
 
-RXZone does no networking. This is a property of the build, not just a promise:
+RXZone makes no network requests. That is a property of the build, not a promise:
 
 | Check | Result |
 |---|---|
-| Networking symbols in source (`URLSession`, sockets, WebSocket, analytics SDKs) | none |
+| Networking symbols in source | none |
 | Linked frameworks | `AppKit`, `SwiftUI`, `Foundation`, `CoreFoundation`, `ServiceManagement`, `Carbon` |
 | Entitlements | `com.apple.security.app-sandbox` only |
-| Network entitlement | not requested — outbound connections are blocked by the sandbox |
+| Network entitlement | not requested, so the sandbox blocks outbound connections |
 
-All time zone data comes from the tz database that ships with macOS. Preferences live in `UserDefaults` inside the app's sandbox container. Nothing is collected, logged, or transmitted.
-
-Reproduce the audit yourself:
+Time zone data comes from the tz database that ships with macOS, and preferences
+live in `UserDefaults` inside the sandbox container. Check it yourself:
 
 ```bash
 grep -rn "URLSession\|URLRequest\|NWConnection\|analytics" RXZone --include="*.swift"
@@ -44,38 +43,23 @@ codesign -d --entitlements - /Applications/RXZone.app
 
 ## Requirements
 
-- macOS 26.5 or later (see note below)
-- Xcode 26
-
-The deployment target is set to the latest macOS. Every API used is available from macOS 14, so lowering `MACOSX_DEPLOYMENT_TARGET` to `14.0` widens compatibility without code changes.
+macOS 14 or later. Built with Xcode 26.
 
 ## Building
 
 ```bash
 xcodebuild -project RXZone.xcodeproj -scheme RXZone -configuration Release build
+xcodebuild test  -project RXZone.xcodeproj -scheme RXZone -destination 'platform=macOS'
 ```
 
-The app is an `LSUIElement` agent: it has no Dock icon and no main window.
+RXZone is an `LSUIElement` agent: no Dock icon, no main window.
 
-## Tests
-
-```bash
-xcodebuild test -project RXZone.xcodeproj -scheme RXZone -destination 'platform=macOS'
-```
-
-91 tests written with Swift Testing, covering the parts most likely to be subtly
-wrong rather than the parts easiest to reach:
-
-- **Daylight saving** — New York shifting an hour between January and July, Sydney inverting the season, Istanbul holding a fixed offset, and offset labels tracking the date rather than a cached value.
-- **Calendar day differences** — zones a day apart, across a year boundary, and with 45-minute offsets, where naive elapsed-time maths gives the wrong answer.
-- **Clock rendering** — 24-hour padding, 12-hour without a leading zero, seconds only when requested. Assertions avoid locale-specific wording so they hold on any machine.
-- **Preference decoding** — empty, partial, and malformed payloads, plus unknown enum cases, all falling back per-key instead of discarding the configuration.
-- **Menu bar selection** — auto-adding new zones, keeping the local clock when the first zone is added, clearing orphaned ids on delete, and never leaving the status item blank.
-- **Catalog** — parity with `TimeZone.knownTimeZoneIdentifiers`, diacritic-insensitive search, prefix ranking, and flag derivation.
-- **Aliases** — that every alias resolves to a zone the catalog really lists, that none shadows a real city of the same name, and that country names are not displaced by a US state sharing the name.
-
-Each test that touches persistence uses its own `UserDefaults` suite, so the
-suite never reads or writes the real app's settings.
+95 tests aim at the parts most likely to be subtly wrong rather than the ones
+easiest to reach — DST transitions in both hemispheres, calendar-day differences
+across year boundaries and 45-minute offsets, clock rendering that does not
+depend on the machine's locale, preference decoding from partial and malformed
+payloads, and menu bar selection. Anything touching persistence uses its own
+`UserDefaults` suite and never reads the real settings.
 
 ## Architecture
 
@@ -100,17 +84,19 @@ RXZone/
     └── TimeZoneRegions.swift    Generated zone → ISO region map (flags only)
 ```
 
-`Design/` sits outside the app target and holds the icon: two layered SVGs and
-`RenderIcon.swift`, an AppKit exporter that draws the same geometry and writes
-all ten macOS sizes. The SVGs stay the source of truth, and every size is
-reproducible from them.
+**One timer, not one per zone.** `ClockService` schedules a single one-shot timer
+onto the next whole minute and reschedules on each fire, so it never drifts and
+the process sleeps in between. It only drops to a one-second cadence while
+seconds are visible, and re-reads the clock after sleep, a manual clock change,
+or a time zone change.
 
-Two design points worth calling out:
+**Preferences are one blob.** A single JSON value in `UserDefaults`, decoded key
+by key with per-property fallbacks, so a payload missing a key degrades to that
+key's default instead of discarding the whole configuration.
 
-**One timer, not one per zone.** `ClockService` schedules a single one-shot timer onto the next whole minute and reschedules on each fire. It never drifts, lets the process sleep in between, and only drops to a one-second cadence while seconds are actually visible. Waking from sleep, a manual clock change, and time zone changes all trigger a re-read.
-
-**Preferences are one blob.** Everything persists as a single JSON value in `UserDefaults`, decoded key-by-key with per-property fallbacks. A payload missing a key degrades to that key's default instead of throwing away the whole configuration, and an unreadable blob resets cleanly to working defaults.
+`Design/` sits outside the app target and holds the icon: layered SVGs plus
+`RenderIcon.swift`, an exporter that redraws them at all ten macOS sizes.
 
 ## License
 
-[MIT](LICENSE) — use it, change it, ship it, keep the copyright notice.
+[MIT](LICENSE)

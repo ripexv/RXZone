@@ -10,46 +10,44 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
+        // `.tabItem` rather than the `Tab` type, which is macOS 15 and up. The
+        // rendered result is identical and this builds against macOS 14.
         TabView {
-            Tab {
-                GeneralSettingsView(model: model)
-            } label: {
-                Label {
-                    Text("General", comment: "Settings tab")
-                } icon: {
-                    Image(systemName: "gearshape")
+            GeneralSettingsView(model: model)
+                .tabItem {
+                    Label {
+                        Text("General", comment: "Settings tab")
+                    } icon: {
+                        Image(systemName: "gearshape")
+                    }
                 }
-            }
 
-            Tab {
-                TimeZoneSettingsView(model: model)
-            } label: {
-                Label {
-                    Text("Time Zones", comment: "Settings tab")
-                } icon: {
-                    Image(systemName: "globe")
+            TimeZoneSettingsView(model: model)
+                .tabItem {
+                    Label {
+                        Text("Time Zones", comment: "Settings tab")
+                    } icon: {
+                        Image(systemName: "globe")
+                    }
                 }
-            }
 
-            Tab {
-                MenuBarSettingsView(model: model)
-            } label: {
-                Label {
-                    Text("Menu Bar", comment: "Settings tab")
-                } icon: {
-                    Image(systemName: "menubar.rectangle")
+            MenuBarSettingsView(model: model)
+                .tabItem {
+                    Label {
+                        Text("Menu Bar", comment: "Settings tab")
+                    } icon: {
+                        Image(systemName: "menubar.rectangle")
+                    }
                 }
-            }
 
-            Tab {
-                TimeTravelSettingsView(model: model)
-            } label: {
-                Label {
-                    Text("Time Travel", comment: "Settings tab")
-                } icon: {
-                    Image(systemName: "clock.arrow.2.circlepath")
+            TimeTravelSettingsView(model: model)
+                .tabItem {
+                    Label {
+                        Text("Time Travel", comment: "Settings tab")
+                    } icon: {
+                        Image(systemName: "clock.arrow.2.circlepath")
+                    }
                 }
-            }
         }
         .frame(width: 520, height: 420)
     }
