@@ -4,6 +4,10 @@ A native macOS menu bar app for tracking several time zones at once — offline,
 
 Built with Swift and SwiftUI (`MenuBarExtra`), no third-party dependencies.
 
+<!-- PREVIEW -->
+
+
+
 ## Features
 
 - **Multiple clocks in the menu bar.** Pick any number of zones; they render side by side. New zones appear there automatically and can be unticked from the row's context menu.
@@ -103,3 +107,7 @@ Two design points worth calling out:
 **One timer, not one per zone.** `ClockService` schedules a single one-shot timer onto the next whole minute and reschedules on each fire. It never drifts, lets the process sleep in between, and only drops to a one-second cadence while seconds are actually visible. Waking from sleep, a manual clock change, and time zone changes all trigger a re-read.
 
 **Preferences are one blob.** Everything persists as a single JSON value in `UserDefaults`, decoded key-by-key with per-property fallbacks. A payload missing a key degrades to that key's default instead of throwing away the whole configuration, and an unreadable blob resets cleanly to working defaults.
+
+## License
+
+[MIT](LICENSE) — use it, change it, ship it, keep the copyright notice.
