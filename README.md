@@ -24,8 +24,9 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 
 ## Install
 
-Download `RXZone.app.zip` from the [latest release](https://github.com/ripexv/RXZone/releases/latest),
-unzip it, and drag **RXZone** into your Applications folder. macOS 14 or later.
+Download the `.dmg` from the [latest release](https://github.com/ripexv/RXZone/releases/latest),
+open it, and drag **RXZone** onto the Applications shortcut. A `.zip` of the app
+is attached too, if you prefer that. macOS 14 or later, Apple Silicon or Intel.
 
 This build is not signed with an Apple Developer ID, so the first launch shows
 *"Apple could not verify RXZone is free of malware."* That is Gatekeeper
