@@ -10,6 +10,7 @@ Built with Swift and SwiftUI (`MenuBarExtra`), no third-party dependencies.
 - **Time travel.** A −24h … +24h slider moves every clock to the same reference instant, so you can answer "if I schedule this at 16:00, what time is it for them?" It only changes what is displayed — the system clock is never touched.
 - **Correct across DST.** All offsets and calendar-day differences come from `TimeZone` and `Calendar`, so daylight saving transitions are handled by Foundation rather than by hand-written rules.
 - **Full time zone database.** All 443 zones from `TimeZone.knownTimeZoneIdentifiers`, searchable by city, country, or region, with localized exemplar city names via ICU's `VVV` pattern.
+- **Search by the city you actually mean.** The tz database names each zone after one representative city, so Las Vegas, Boston, Munich and İzmir do not appear in it at all. RXZone adds ~145 search aliases: searching "New Jersey" finds the right zone, says plainly that it shares New York's, and labels the row "New Jersey". Aliases only widen search — they never invent a zone, and every alias is checked against the real database at startup.
 - **Custom labels and emoji** per zone, with a flag suggested automatically from the zone's region.
 - **12/24-hour clock**, following the system setting by default.
 - **Drag to reorder**, launch at login via `SMAppService`, and an optional global shortcut.
@@ -55,7 +56,7 @@ The app is an `LSUIElement` agent: it has no Dock icon and no main window.
 xcodebuild test -project RXZone.xcodeproj -scheme RXZone -destination 'platform=macOS'
 ```
 
-71 tests written with Swift Testing, covering the parts most likely to be subtly
+85 tests written with Swift Testing, covering the parts most likely to be subtly
 wrong rather than the parts easiest to reach:
 
 - **Daylight saving** — New York shifting an hour between January and July, Sydney inverting the season, Istanbul holding a fixed offset, and offset labels tracking the date rather than a cached value.
@@ -64,6 +65,7 @@ wrong rather than the parts easiest to reach:
 - **Preference decoding** — empty, partial, and malformed payloads, plus unknown enum cases, all falling back per-key instead of discarding the configuration.
 - **Menu bar selection** — auto-adding new zones, keeping the local clock when the first zone is added, clearing orphaned ids on delete, and never leaving the status item blank.
 - **Catalog** — parity with `TimeZone.knownTimeZoneIdentifiers`, diacritic-insensitive search, prefix ranking, and flag derivation.
+- **Aliases** — that every alias resolves to a zone the catalog really lists, that none shadows a real city of the same name, and that country names are not displaced by a US state sharing the name.
 
 Each test that touches persistence uses its own `UserDefaults` suite, so the
 suite never reads or writes the real app's settings.
