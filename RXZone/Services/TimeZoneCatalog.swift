@@ -22,10 +22,17 @@ nonisolated enum TimeZoneCatalog {
         let country: String
         /// Flag emoji, or a globe when the region is unknown.
         let symbol: String
-        /// Pre-lowercased haystack used for substring matching.
+        /// Other place names that share this zone, e.g. `Las Vegas`.
+        let aliases: [String]
+        /// Pre-folded haystack used for substring matching.
         let searchText: String
 
         var id: String { identifier }
+    }
+
+    /// Case- and diacritic-insensitive form used for every comparison.
+    private static func fold(_ text: String) -> String {
+        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
     }
 
     /// All selectable zones, sorted by their localized city name.
@@ -49,24 +56,39 @@ nonisolated enum TimeZoneCatalog {
     /// Case- and diacritic-insensitive search across city, identifier and country.
     /// An empty query returns the whole catalog.
     static func search(_ query: String) -> [Entry] {
-        let needle = query
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        let needle = fold(query.trimmingCharacters(in: .whitespacesAndNewlines))
         guard !needle.isEmpty else { return entries }
 
-        // Rank exact prefix matches on the city above incidental matches so that
-        // typing "lon" surfaces London before Colon or Longyearbyen.
+        // Rank prefix matches — on the city or on an alias — above incidental
+        // ones, so "lon" surfaces London before Colon, and "las v" surfaces
+        // Los Angeles through "Las Vegas" instead of burying it.
         var prefixMatches: [Entry] = []
         var otherMatches: [Entry] = []
         for entry in entries where entry.searchText.contains(needle) {
-            let city = entry.city.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-            if city.hasPrefix(needle) {
+            let isPrefix = fold(entry.city).hasPrefix(needle)
+                || entry.aliases.contains { fold($0).hasPrefix(needle) }
+            if isPrefix {
                 prefixMatches.append(entry)
             } else {
                 otherMatches.append(entry)
             }
         }
         return prefixMatches + otherMatches
+    }
+
+    /// The alias responsible for a match, when the query is absent from the
+    /// zone's own city name.
+    ///
+    /// Lets the picker say "New Jersey" and explain that it shares New York's
+    /// zone, rather than silently offering New York and leaving the user to
+    /// guess why.
+    static func matchedAlias(for entry: Entry, query: String) -> String? {
+        let needle = fold(query.trimmingCharacters(in: .whitespacesAndNewlines))
+        guard !needle.isEmpty, !fold(entry.city).contains(needle) else { return nil }
+
+        let folded = entry.aliases.map { (alias: $0, key: fold($0)) }
+        return folded.first { $0.key.hasPrefix(needle) }?.alias
+            ?? folded.first { $0.key.contains(needle) }?.alias
     }
 
     // MARK: - Construction
@@ -98,7 +120,9 @@ nonisolated enum TimeZoneCatalog {
             let country = regionCode.flatMap { locale.localizedString(forRegionCode: $0) } ?? ""
             let symbol = regionCode.flatMap { TimeZoneRegions.flagEmoji(forRegionCode: $0) } ?? fallbackSymbol
 
-            let haystack = [city, identifier.replacingOccurrences(of: "_", with: " "), area, country, regionCode ?? ""]
+            let aliases = TimeZoneAliases.aliasesByIdentifier[identifier] ?? []
+            let haystack = ([city, identifier.replacingOccurrences(of: "_", with: " "),
+                             area, country, regionCode ?? ""] + aliases)
                 .joined(separator: " ")
                 .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: locale)
 
@@ -108,6 +132,7 @@ nonisolated enum TimeZoneCatalog {
                 area: area,
                 country: country,
                 symbol: symbol,
+                aliases: aliases,
                 searchText: haystack
             )
         }

@@ -123,6 +123,86 @@ struct MenuBarSelectionTests {
     }
 }
 
+@Suite("Local row")
+struct LocalRowTests {
+
+    /// Starter zones include the Mac's own zone, so tests that care about the
+    /// standalone local row start from a list that does not contain it.
+    private func modelWithoutLocalZone() -> (AppModel, UserDefaults, String) {
+        let (model, defaults, name) = makeModel()
+        model.preferences.zones.removeAll { $0.identifier == TimeZone.current.identifier }
+        return (model, defaults, name)
+    }
+
+    @Test("The local row is dropped when that zone is already in the list")
+    func hiddenWhenDuplicated() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: TimeZone.current.identifier)]
+        #expect(model.localZoneIsTracked)
+        #expect(!model.rows.contains { $0.isLocal }, "Two clocks showing the same time is noise")
+        #expect(model.rows.count == 1)
+    }
+
+    @Test("The local row is shown when the Mac's zone is not tracked")
+    func shownWhenNotDuplicated() {
+        let (model, defaults, name) = modelWithoutLocalZone()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.showsLocalZone = true
+        #expect(model.rows.first?.isLocal == true)
+    }
+
+    @Test("Turning the local row off hides it")
+    func canBeSwitchedOff() {
+        let (model, defaults, name) = modelWithoutLocalZone()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.showsLocalZone = false
+        #expect(!model.rows.contains { $0.isLocal })
+    }
+
+    @Test("Time travel brings the local row back even when switched off")
+    func returnsWhileTimeTravelling() {
+        let (model, defaults, name) = modelWithoutLocalZone()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.showsLocalZone = false
+        model.travelMinutes = 180
+        #expect(model.rows.contains { $0.isLocal },
+                "The system clock does not time travel, so the offsets need an anchor")
+
+        model.resetTravel()
+        #expect(!model.rows.contains { $0.isLocal })
+    }
+
+    @Test("Time travel does not resurrect a duplicated local row")
+    func staysHiddenWhenDuplicatedDuringTravel() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: TimeZone.current.identifier)]
+        model.preferences.showsLocalZone = false
+        model.travelMinutes = 180
+        #expect(!model.rows.contains { $0.isLocal })
+    }
+
+    @Test("The menu bar does not show the same time twice")
+    func menuBarDeduplicates() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: TimeZone.current.identifier)]
+        let own = model.preferences.zones[0]
+        model.setShowsInMenuBar(true, for: ZoneRow.localRowID)
+        model.setShowsInMenuBar(true, for: own.id)
+
+        #expect(model.menuBarRows.count == 1)
+        #expect(!model.menuBarRows[0].isLocal, "The explicit zone wins over the synthetic row")
+    }
+}
+
 @Suite("Time travel")
 struct TimeTravelTests {
 

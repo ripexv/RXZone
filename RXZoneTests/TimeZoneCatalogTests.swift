@@ -92,6 +92,88 @@ struct CatalogSearchTests {
     }
 }
 
+@Suite("Place aliases")
+struct AliasTests {
+
+    @Test("Cities without their own zone are still findable", arguments: [
+        ("las vegas", "America/Los_Angeles"),
+        ("new jersey", "America/New_York"),
+        ("boston", "America/New_York"),
+        ("seattle", "America/Los_Angeles"),
+        ("munich", "Europe/Berlin"),
+        ("ankara", "Europe/Istanbul"),
+        ("osaka", "Asia/Tokyo"),
+        // macOS ships India under its historical identifier, though ICU still
+        // displays the city as "Kolkata".
+        ("mumbai", "Asia/Calcutta"),
+        ("cape town", "Africa/Johannesburg"),
+    ])
+    func aliasFindsZone(query: String, identifier: String) {
+        #expect(TimeZoneCatalog.search(query).first?.identifier == identifier,
+                "\(query) should be the top result for \(identifier)")
+    }
+
+    @Test("US state names resolve to their dominant zone", arguments: [
+        ("texas", "America/Chicago"),
+        ("california", "America/Los_Angeles"),
+        ("florida", "America/New_York"),
+        ("arizona", "America/Phoenix"),
+    ])
+    func stateFindsZone(query: String, identifier: String) {
+        #expect(TimeZoneCatalog.search(query).first?.identifier == identifier)
+    }
+
+    @Test("An alias match reports the name the user searched for")
+    func aliasIsReportedBack() {
+        let entry = try! #require(TimeZoneCatalog.search("las vegas").first)
+        #expect(TimeZoneCatalog.matchedAlias(for: entry, query: "las vegas") == "Las Vegas")
+    }
+
+    @Test("Matching the zone's own city reports no alias")
+    func cityMatchHasNoAlias() {
+        let entry = try! #require(TimeZoneCatalog.search("los angeles").first)
+        #expect(TimeZoneCatalog.matchedAlias(for: entry, query: "los angeles") == nil,
+                "The row should stay labelled Los Angeles, not be renamed")
+    }
+
+    @Test("Alias search ignores case and diacritics")
+    func aliasFolding() {
+        #expect(TimeZoneCatalog.search("MÜNCHEN").first?.identifier == "Europe/Berlin")
+        #expect(TimeZoneCatalog.search("izmir").first?.identifier == "Europe/Istanbul")
+        #expect(TimeZoneCatalog.search("İzmir").first?.identifier == "Europe/Istanbul")
+    }
+
+    @Test("Every alias points at a zone the catalog actually lists")
+    func noAliasInventsAZone() {
+        // Deliberately stricter than `TimeZone(identifier:) != nil`, which also
+        // accepts historical links like `Asia/Kolkata` that never appear as a
+        // catalog entry and would leave the alias silently unreachable.
+        let known = Set(TimeZone.knownTimeZoneIdentifiers)
+        let unreachable = TimeZoneAliases.identifierByAlias.filter { !known.contains($0.value) }
+        #expect(unreachable.isEmpty, "These aliases point nowhere: \(unreachable)")
+    }
+
+    @Test("Aliases never collide with a real city name in the catalog")
+    func aliasesDoNotShadowRealCities() {
+        let cities = Set(TimeZoneCatalog.entries.map { $0.city.lowercased() })
+        let shadowed = TimeZoneAliases.identifierByAlias.keys.filter { alias in
+            guard cities.contains(alias.lowercased()) else { return false }
+            // Only a problem when the alias points somewhere else than the
+            // real city of the same name.
+            return TimeZoneCatalog.entries.first { $0.city.lowercased() == alias.lowercased() }?
+                .identifier != TimeZoneAliases.identifierByAlias[alias]
+        }
+        #expect(shadowed.isEmpty, "These aliases hide a real zone: \(shadowed)")
+    }
+
+    @Test("Searching a country still finds the country, not a US state")
+    func countryNamesWin() {
+        // "Georgia" is a country as well as a US state; the country must not be
+        // buried by an alias.
+        #expect(TimeZoneCatalog.search("georgia").contains { $0.identifier == "Asia/Tbilisi" })
+    }
+}
+
 @Suite("Region flags")
 struct FlagTests {
 

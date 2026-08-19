@@ -93,6 +93,11 @@ private struct GeneralSettingsView: View {
                 }
             } header: {
                 Text("Popover", comment: "Settings section title")
+            } footer: {
+                Text("macOS already shows local time in its own clock, so this row is optional. It reappears while time travelling, because the system clock does not move with the slider. It is also hidden automatically when this Mac’s zone is already in your list.",
+                     comment: "Explains when the local row is shown")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
 
             Section {
@@ -187,7 +192,7 @@ private struct TimeZoneSettingsView: View {
                 trackedIdentifiers: model.trackedIdentifiers,
                 referenceDate: model.displayDate,
                 timeFormat: model.preferences.timeFormat,
-                onSelect: { model.addZone(identifier: $0) },
+                onSelect: { model.addZone(identifier: $0, customLabel: $1 ?? "") },
                 onClose: { isAdding = false }
             )
             .frame(width: 360)
@@ -283,11 +288,16 @@ private struct MenuBarSettingsView: View {
             }
 
             Section {
-                menuBarToggle(id: ZoneRow.localRowID,
-                              label: "\(model.localRow.symbol) \(model.localRow.subtitle)")
+                // Labelled by what it does, not by the city it happens to
+                // resolve to — otherwise it reads like a zone the user added.
+                menuBarToggle(
+                    id: ZoneRow.localRowID,
+                    title: String(localized: "This Mac’s time zone",
+                                  comment: "Menu bar toggle for the local clock"),
+                    subtitle: "\(model.localRow.symbol) \(model.localRow.subtitle)")
 
                 ForEach(model.preferences.zones) { item in
-                    menuBarToggle(id: item.id, label: "\(item.symbol) \(item.title)")
+                    menuBarToggle(id: item.id, title: "\(item.displaySymbol) \(item.title)")
                 }
             } header: {
                 Text("Show in Menu Bar", comment: "Settings section title")
@@ -337,12 +347,19 @@ private struct MenuBarSettingsView: View {
         .formStyle(.grouped)
     }
 
-    private func menuBarToggle(id: UUID, label: String) -> some View {
+    private func menuBarToggle(id: UUID, title: String, subtitle: String? = nil) -> some View {
         Toggle(isOn: Binding(
             get: { model.showsInMenuBar(id) },
             set: { model.setShowsInMenuBar($0, for: id) }
         )) {
-            Text(label)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .disabled(!model.preferences.menuBarStyle.showsTime)
     }

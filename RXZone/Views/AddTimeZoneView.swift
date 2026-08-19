@@ -13,7 +13,10 @@ struct AddTimeZoneView: View {
     let trackedIdentifiers: Set<String>
     let referenceDate: Date
     let timeFormat: TimeFormat
-    let onSelect: (String) -> Void
+    /// Receives the zone identifier plus, when the match came from an alias,
+    /// the name the user actually searched for — so a row for Las Vegas can be
+    /// labelled "Las Vegas" while still tracking `America/Los_Angeles`.
+    let onSelect: (String, String?) -> Void
     let onClose: () -> Void
 
     @State private var query = ""
@@ -90,9 +93,14 @@ struct AddTimeZoneView: View {
 
     private func resultRow(_ entry: TimeZoneCatalog.Entry) -> some View {
         let isTracked = trackedIdentifiers.contains(entry.identifier)
+        // When the query matched an alias, lead with the place the user asked
+        // for and say plainly whose zone it shares. Nothing here invents a time
+        // zone — the identifier stays exactly what Foundation gave us.
+        let alias = TimeZoneCatalog.matchedAlias(for: entry, query: query)
+        let title = alias ?? entry.city
 
         return Button {
-            onSelect(entry.identifier)
+            onSelect(entry.identifier, alias)
             onClose()
         } label: {
             HStack(spacing: 10) {
@@ -101,10 +109,13 @@ struct AddTimeZoneView: View {
                     .frame(minWidth: 24, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(entry.city)
+                    Text(title)
                         .fontWeight(.medium)
                         .lineLimit(1)
-                    Text(subtitle(for: entry))
+                    Text(alias == nil
+                         ? subtitle(for: entry)
+                         : String(localized: "Same zone as \(entry.city)",
+                                  comment: "Shown when a searched city shares another city's time zone"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -128,12 +139,14 @@ struct AddTimeZoneView: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        // The tooltip always names the real identifier, so the underlying zone
+        // is one hover away no matter which name the row is showing.
         .help(isTracked
-            ? Text("Already added", comment: "Tooltip for a zone in the list")
-            : Text("Add \(entry.city)", comment: "Tooltip to add a zone"))
+            ? Text("Already added · \(entry.identifier)", comment: "Tooltip for a zone in the list")
+            : Text("Add \(title) · \(entry.identifier)", comment: "Tooltip to add a zone"))
         .accessibilityLabel(Text(isTracked
-            ? String(localized: "\(entry.city), already added", comment: "Accessibility label")
-            : String(localized: "Add \(entry.city), \(time(for: entry))", comment: "Accessibility label")))
+            ? String(localized: "\(title), already added", comment: "Accessibility label")
+            : String(localized: "Add \(title), \(time(for: entry))", comment: "Accessibility label")))
     }
 
     private var noResults: some View {

@@ -22,7 +22,7 @@ struct MenuBarView: View {
                     trackedIdentifiers: model.trackedIdentifiers,
                     referenceDate: model.displayDate,
                     timeFormat: model.preferences.timeFormat,
-                    onSelect: { model.addZone(identifier: $0) },
+                    onSelect: { model.addZone(identifier: $0, customLabel: $1 ?? "") },
                     onClose: { isAdding = false }
                 )
             } else {

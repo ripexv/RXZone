@@ -104,10 +104,22 @@ final class AppModel {
 
     // MARK: - Rows
 
-    /// The pinned local row plus every saved zone, in user order.
+    /// True when the Mac's own zone is already one of the saved zones. A
+    /// separate "This Mac" row would then be a second clock showing the same
+    /// time, so it is left out.
+    var localZoneIsTracked: Bool {
+        preferences.zones.contains { $0.identifier == clock.localTimeZone.identifier }
+    }
+
+    /// Saved zones, optionally preceded by a row for the Mac's own zone.
+    ///
+    /// macOS already shows local time in its own menu bar clock, so this row is
+    /// redundant most of the time and can be switched off. The exception is time
+    /// travel: the system clock does not move with the slider, so without this
+    /// row there is nothing to read the shifted offsets against.
     var rows: [ZoneRow] {
         var rows: [ZoneRow] = []
-        if preferences.showsLocalZone {
+        if (preferences.showsLocalZone || isTimeTravelling), !localZoneIsTracked {
             rows.append(localRow)
         }
         rows.append(contentsOf: preferences.zones.map { Self.row(for: $0) })
@@ -120,7 +132,7 @@ final class AppModel {
             id: ZoneRow.localRowID,
             timeZone: zone,
             symbol: TimeZoneCatalog.suggestedSymbol(for: zone.identifier),
-            title: String(localized: "Local", comment: "Row for the Mac's own time zone"),
+            title: String(localized: "This Mac", comment: "Row for the Mac's own time zone"),
             subtitle: TimeZoneCatalog.cityName(for: zone.identifier),
             isLocal: true,
             isAvailable: true
@@ -146,11 +158,17 @@ final class AppModel {
     /// Falls back to the local zone when nothing is selected, or when every
     /// selected zone has since been deleted, so the status item is never blank.
     var menuBarRows: [ZoneRow] {
+        let selected = preferences.zones.filter { preferences.menuBarZoneIDs.contains($0.id) }
+
         var rows: [ZoneRow] = []
-        if preferences.menuBarZoneIDs.contains(ZoneRow.localRowID) { rows.append(localRow) }
-        rows += preferences.zones
-            .filter { preferences.menuBarZoneIDs.contains($0.id) }
-            .map { Self.row(for: $0) }
+        // Skip the local clock when a selected zone already shows the same
+        // time, otherwise the menu bar would repeat itself.
+        if preferences.menuBarZoneIDs.contains(ZoneRow.localRowID),
+           !selected.contains(where: { $0.identifier == clock.localTimeZone.identifier }) {
+            rows.append(localRow)
+        }
+        rows += selected.map { Self.row(for: $0) }
+
         // An empty selection means "not configured yet" rather than "blank
         // status item", so the local clock stands in.
         return rows.isEmpty ? [localRow] : rows
@@ -185,9 +203,12 @@ final class AppModel {
     /// Adds a zone and shows it in the menu bar straight away — a zone you just
     /// picked is one you want to see. It can be unticked from the row's context
     /// menu or in Settings.
-    func addZone(identifier: String) {
+    /// - Parameter customLabel: the name to show on the row. Set when the zone
+    ///   was found under another name, so someone in New Jersey sees "New
+    ///   Jersey" rather than "New York" while still tracking `America/New_York`.
+    func addZone(identifier: String, customLabel: String = "") {
         guard TimeZone(identifier: identifier) != nil else { return }
-        let item = TimeZoneItem(identifier: identifier)
+        let item = TimeZoneItem(identifier: identifier, customLabel: customLabel)
         preferences.zones.append(item)
         setShowsInMenuBar(true, for: item.id)
     }
