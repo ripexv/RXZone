@@ -80,10 +80,31 @@ final class ClockService {
         schedule()
     }
 
+    /// Whether a tick is currently pending.
+    var isTicking: Bool { timer != nil }
+
+    /// Stops the clock while nothing it draws can be seen, and starts it again
+    /// on wake. Ticking through a display sleep costs battery for a status item
+    /// nobody is looking at — a full second-granularity tick rate is the worst
+    /// case, and that is exactly when a Mac is most likely to be on battery.
+    func setDisplayAsleep(_ asleep: Bool) {
+        guard asleep != isDisplayAsleep else { return }
+        isDisplayAsleep = asleep
+        // `refresh()` on wake re-reads the clock before the first visible frame,
+        // so the pause can never surface as a stale time.
+        asleep ? schedule() : refresh()
+    }
+
+    @ObservationIgnored private var isDisplayAsleep = false
+
     // MARK: - Timer
 
     private func schedule() {
         timer?.invalidate()
+        timer = nil
+
+        // Do not wake the CPU for a screen that is off.
+        guard !isDisplayAsleep else { return }
 
         let interval = granularity.interval
         let elapsed = Date().timeIntervalSinceReferenceDate
@@ -126,5 +147,19 @@ final class ClockService {
             forName: NSLocale.currentLocaleDidChangeNotification, object: nil, queue: .main, using: handler))
         observers.append(NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main, using: handler))
+
+        // The display sleeps on its own well before the machine does, so this is
+        // a separate and far more frequent signal than system sleep.
+        let workspace = NSWorkspace.shared.notificationCenter
+        observers.append(workspace.addObserver(
+            forName: NSWorkspace.screensDidSleepNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.setDisplayAsleep(true) }
+        })
+        observers.append(workspace.addObserver(
+            forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.setDisplayAsleep(false) }
+        })
     }
 }
