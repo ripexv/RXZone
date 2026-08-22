@@ -108,6 +108,32 @@ enum DateFormatting {
         }
     }
 
+    // MARK: - Sharing
+
+    /// Every clock at one instant, laid out for pasting into a message.
+    ///
+    /// A zone that lands on another date carries that date, so a bare `00:00`
+    /// can never be read as tonight when it is actually tomorrow morning — the
+    /// mistake this text exists to prevent.
+    static func meetingSummary(
+        for zones: [(title: String, timeZone: TimeZone)],
+        at date: Date,
+        reference: TimeZone,
+        format: TimeFormat
+    ) -> String {
+        var lines = [dateString(for: date, in: reference)]
+        for zone in zones {
+            let time = timeString(for: date, in: zone.timeZone, format: format)
+            let delta = dayDelta(at: date, zone: zone.timeZone, reference: reference)
+            if delta == 0 {
+                lines.append("\(zone.title) — \(time)")
+            } else {
+                lines.append("\(zone.title) — \(time) (\(dateString(for: date, in: zone.timeZone)))")
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
+
     // MARK: - Offsets
 
     /// Difference between two zones at a given instant, e.g. `+3h`, `-5h30m`.

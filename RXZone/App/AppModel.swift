@@ -180,6 +180,18 @@ final class AppModel {
         return rows.isEmpty ? [localRow] : rows
     }
 
+    /// All tracked clocks at the displayed instant, ready to paste into a
+    /// message. Reads from `displayDate`, so time travelling to a candidate
+    /// slot and copying gives the times for that slot rather than for now.
+    var meetingTimeText: String {
+        DateFormatting.meetingSummary(
+            for: rows.map { (title: $0.title, timeZone: $0.timeZone) },
+            at: displayDate,
+            reference: referenceTimeZone,
+            format: preferences.timeFormat
+        )
+    }
+
     // MARK: - Menu bar rendering
 
     /// The exact string the status item draws.

@@ -191,6 +191,67 @@ struct ClockRenderingTests {
     }
 }
 
+@Suite("Meeting summary")
+struct MeetingSummaryTests {
+
+    private var zones: [(title: String, timeZone: TimeZone)] {
+        [("Istanbul", zone("Europe/Istanbul")),
+         ("London", zone("Europe/London")),
+         ("New York", zone("America/New_York"))]
+    }
+
+    @Test("Every zone gets a line, under a heading for the reference date")
+    func listsEveryZone() {
+        let text = DateFormatting.meetingSummary(
+            for: zones, at: Instant.summer, reference: zone("Europe/Istanbul"), format: .twentyFourHour)
+        let lines = text.split(separator: "\n")
+
+        #expect(lines.count == 4, "One heading plus one line per zone")
+        #expect(lines[1].hasPrefix("Istanbul — 15:00"))
+        #expect(lines[2].hasPrefix("London — 13:00"))
+        #expect(lines[3].hasPrefix("New York — 08:00"))
+    }
+
+    @Test("A zone on the same day carries no date")
+    func sameDayHasNoDate() {
+        let text = DateFormatting.meetingSummary(
+            for: zones, at: Instant.summer, reference: zone("Europe/Istanbul"), format: .twentyFourHour)
+        #expect(!text.contains("15:00 ("), "A redundant date would just be noise")
+    }
+
+    @Test("A zone on another day says so, so 00:00 is never ambiguous")
+    func differentDayCarriesItsDate() {
+        let text = DateFormatting.meetingSummary(
+            for: [("Tokyo", zone("Asia/Tokyo"))],
+            at: Instant.lateEvening,
+            reference: zone("America/New_York"),
+            format: .twentyFourHour)
+        // 22:00 UTC is already the next morning in Tokyo but still the 15th in New York.
+        #expect(text.contains("("), "The Tokyo line must spell out which day it lands on")
+    }
+
+    @Test("The summary follows the chosen clock format")
+    func honoursTimeFormat() {
+        let twelve = DateFormatting.meetingSummary(
+            for: [("New York", zone("America/New_York"))],
+            at: Instant.summer, reference: zone("America/New_York"), format: .twelveHour)
+        #expect(twelve.contains("8:"))
+
+        let twentyFour = DateFormatting.meetingSummary(
+            for: [("New York", zone("America/New_York"))],
+            at: Instant.summer, reference: zone("America/New_York"), format: .twentyFourHour)
+        #expect(twentyFour.contains("08:00"))
+    }
+
+    @Test("An empty list still yields the date on its own")
+    func emptyList() {
+        let text = DateFormatting.meetingSummary(
+            for: [], at: Instant.summer, reference: zone("Europe/Istanbul"), format: .system)
+        #expect(!text.isEmpty)
+        #expect(!text.contains("\n"))
+    }
+}
+
 @Suite("Time travel labels")
 struct TravelLabelTests {
 

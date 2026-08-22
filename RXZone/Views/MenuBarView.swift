@@ -86,6 +86,12 @@ struct MenuBarView: View {
                                     Text("Copy Time", comment: "Context menu action")
                                 }
 
+                                Button {
+                                    copy(model.meetingTimeText)
+                                } label: {
+                                    Text("Copy All Times", comment: "Context menu action")
+                                }
+
                                 if !row.isLocal {
                                     Divider()
                                     Button(role: .destructive) {
@@ -195,8 +201,12 @@ struct MenuBarView: View {
             format: model.preferences.timeFormat
         )
         let date = DateFormatting.dateString(for: model.displayDate, in: row.timeZone)
+        copy("\(row.title) — \(date), \(time)")
+    }
+
+    private func copy(_ text: String) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.setString("\(row.title) — \(date), \(time)", forType: .string)
+        pasteboard.setString(text, forType: .string)
     }
 }
