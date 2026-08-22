@@ -46,11 +46,14 @@ nonisolated struct TimeZoneItem: Identifiable, Codable, Hashable, Sendable {
         self.workingHours = workingHours
     }
 
-    /// At most two glyphs, no whitespace or line breaks. Counting is by
-    /// `Character`, so a flag emoji — two Unicode scalars — counts as one.
+    /// At most two emoji, and nothing else.
+    ///
+    /// The field this feeds is a free-form text field, so anything can arrive:
+    /// typing a city name used to leave two stray letters sitting in the menu
+    /// bar where a flag belonged. Non-emoji is dropped rather than truncated.
+    /// Counting is by `Character`, so a flag — two Unicode scalars — is one.
     static func sanitizedSymbol(_ raw: String) -> String {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return String(trimmed.prefix(2))
+        String(raw.filter(\.isEmojiGlyph).prefix(2))
     }
 
     // Decoded defensively: a stored payload written by an older build may be

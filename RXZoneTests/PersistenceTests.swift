@@ -72,11 +72,11 @@ struct PreferencesDecodingTests {
 @Suite("Time zone items")
 struct TimeZoneItemTests {
 
-    @Test("A pasted essay is clamped to two glyphs")
+    @Test("A pasted run of emoji is clamped to two glyphs")
     func longSymbolIsClamped() {
         var item = TimeZoneItem(identifier: "Europe/Istanbul")
-        item.symbol = "this is far too long to sit in a menu bar"
-        #expect(item.symbol.count == 2)
+        item.symbol = "🏠🏢💻⏰🌍🚀☕️"
+        #expect(item.symbol == "🏠🏢")
     }
 
     @Test("A flag counts as one glyph, not two scalars")
@@ -100,11 +100,48 @@ struct TimeZoneItemTests {
         #expect(item.symbol == "🇹🇷")
     }
 
-    @Test("An oversized stored symbol is clamped on decode too")
+    @Test("Typed letters are rejected outright, not truncated into the menu bar")
+    func lettersAreRejected() {
+        var item = TimeZoneItem(identifier: "Africa/Accra")
+        item.symbol = "tehran"
+        #expect(item.symbol.isEmpty, "Two stray letters standing in for a flag was the bug")
+        #expect(item.displaySymbol == "🇬🇭", "An empty symbol falls back to the region flag")
+    }
+
+    @Test("Characters Unicode calls emoji but nobody would pick are rejected",
+          arguments: ["1", "#", "©", "→", "a1"])
+    func nearMissesAreRejected(input: String) {
+        var item = TimeZoneItem(identifier: "Europe/Istanbul")
+        item.symbol = input
+        #expect(item.symbol.isEmpty, "\(input) is not something anyone means as a symbol")
+    }
+
+    @Test("Emoji needing a variation selector or a joiner still pass",
+          arguments: ["☀️", "✈️", "❤️", "🧑‍💻", "🏠"])
+    func realEmojiPass(input: String) {
+        var item = TimeZoneItem(identifier: "Europe/Istanbul")
+        item.symbol = input
+        #expect(item.symbol == input)
+    }
+
+    @Test("An emoji buried in typed text is salvaged")
+    func mixedInputKeepsTheEmoji() {
+        var item = TimeZoneItem(identifier: "Europe/Istanbul")
+        item.symbol = "ofis 🏢 burada"
+        #expect(item.symbol == "🏢")
+    }
+
+    @Test("A stored symbol is filtered and clamped on decode too")
     func decodingClamps() throws {
-        let json = #"{"identifier":"Europe/Istanbul","symbol":"aaaaaaaaaaaaaaa","customLabel":""}"#
+        let json = #"{"identifier":"Europe/Istanbul","symbol":"🏠🏢💻⏰","customLabel":""}"#
         let item = try JSONDecoder().decode(TimeZoneItem.self, from: Data(json.utf8))
-        #expect(item.symbol.count == 2)
+        #expect(item.symbol == "🏠🏢")
+
+        // Payloads written by the build that accepted text must not resurrect it.
+        let stale = #"{"identifier":"Africa/Accra","symbol":"te","customLabel":""}"#
+        let repaired = try JSONDecoder().decode(TimeZoneItem.self, from: Data(stale.utf8))
+        #expect(repaired.symbol.isEmpty)
+        #expect(repaired.displaySymbol == "🇬🇭")
     }
 
     @Test("Clearing the symbol falls back to the region flag for display")

@@ -201,15 +201,10 @@ private struct TimeZoneSettingsView: View {
         let binding = binding(for: item)
 
         return HStack(spacing: 10) {
-            TextField(
-                text: binding.symbol,
-                prompt: Text(verbatim: TimeZoneCatalog.fallbackSymbol)
-            ) {
-                Text("Emoji", comment: "Field label for the row emoji")
-            }
-            .labelsHidden()
-            .frame(width: 52)
-            .multilineTextAlignment(.center)
+            EmojiField(
+                symbol: binding.symbol,
+                fallback: TimeZoneCatalog.suggestedSymbol(for: item.identifier)
+            )
 
             VStack(alignment: .leading, spacing: 2) {
                 TextField(
@@ -255,6 +250,99 @@ private struct TimeZoneSettingsView: View {
         guard let selection else { return }
         model.removeZone(id: selection)
         self.selection = nil
+    }
+}
+
+/// Emoji picker for a row's symbol.
+///
+/// Replaces a plain text field, which accepted anything typed into it — a city
+/// name left two stray letters standing in for a flag. Picking is now the
+/// primary path; the field below the grid stays for pasting or for the system
+/// palette, and silently drops whatever is not an emoji.
+private struct EmojiField: View {
+    @Binding var symbol: String
+    /// Shown greyed when the user has cleared the field.
+    let fallback: String
+
+    @State private var isPicking = false
+    @State private var pasted = ""
+    @FocusState private var isFieldFocused: Bool
+
+    private let columns = Array(repeating: GridItem(.fixed(30), spacing: 2), count: 8)
+
+    var body: some View {
+        Button {
+            isPicking = true
+        } label: {
+            Text(symbol.isEmpty ? fallback : symbol)
+                .font(.title3)
+                .opacity(symbol.isEmpty ? 0.4 : 1)
+                .frame(width: 40, height: 22)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.borderless)
+        .help(Text("Choose an emoji", comment: "Tooltip"))
+        .accessibilityLabel(Text("Choose an emoji", comment: "Button"))
+        .popover(isPresented: $isPicking, arrowEdge: .bottom) { picker }
+    }
+
+    private var picker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns, spacing: 2) {
+                ForEach(EmojiSuggestions.all, id: \.self) { option in
+                    Button {
+                        symbol = option
+                        isPicking = false
+                    } label: {
+                        Text(option)
+                            .font(.title3)
+                            .frame(width: 30, height: 28)
+                            .background(
+                                symbol == option ? Color.accentColor.opacity(0.2) : .clear,
+                                in: .rect(cornerRadius: 5)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Divider()
+
+            HStack(spacing: 8) {
+                TextField(text: $pasted, prompt: Text("Paste any emoji", comment: "Field prompt")) {
+                    Text("Custom emoji", comment: "Accessibility label")
+                }
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .focused($isFieldFocused)
+                .onChange(of: pasted) { _, new in
+                    // Filtered on the way in, so nothing invalid is ever stored.
+                    let cleaned = TimeZoneItem.sanitizedSymbol(new)
+                    if !cleaned.isEmpty {
+                        symbol = cleaned
+                        pasted = ""
+                        isPicking = false
+                    } else if !new.isEmpty {
+                        pasted = ""
+                    }
+                }
+
+                Button {
+                    symbol = ""
+                    isPicking = false
+                } label: {
+                    Text("Reset", comment: "Clears a custom emoji back to the region flag")
+                }
+            }
+
+            Text("Press Control-Command-Space for the system emoji picker.",
+                 comment: "Hint about the macOS emoji palette")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(width: 274)
+        .onAppear { isFieldFocused = true }
     }
 }
 
