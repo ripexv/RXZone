@@ -24,6 +24,18 @@ struct TimeZoneRow: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
+                    // Filled while at work, hollow outside it. Nothing at all
+                    // when no hours are set — an empty ring would read as a
+                    // claim the app is not entitled to make.
+                    if let isWorking = row.isWorking {
+                        Image(systemName: isWorking ? "circle.fill" : "circle")
+                            .font(.system(size: 7))
+                            .foregroundStyle(isWorking ? Color.green : Color.secondary)
+                            .help(isWorking
+                                  ? Text("Working hours", comment: "Tooltip on the status dot")
+                                  : Text("Outside working hours", comment: "Tooltip on the status dot"))
+                    }
+
                     Text(row.title)
                         .fontWeight(.medium)
                         .lineLimit(1)
@@ -110,6 +122,11 @@ struct TimeZoneRow: View {
 
     private var accessibilityLabel: Text {
         var spoken = "\(row.title), \(timeText), \(detail)"
+        if let isWorking = row.isWorking {
+            spoken += ", " + (isWorking
+                ? String(localized: "working hours", comment: "Spoken status")
+                : String(localized: "outside working hours", comment: "Spoken status"))
+        }
         if let dayLabel { spoken += ", \(dayLabel)" }
         if isInMenuBar {
             spoken += ", " + String(localized: "shown in the menu bar",

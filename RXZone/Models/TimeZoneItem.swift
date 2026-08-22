@@ -28,11 +28,22 @@ nonisolated struct TimeZoneItem: Identifiable, Codable, Hashable, Sendable {
         didSet { symbol = Self.sanitizedSymbol(symbol) }
     }
 
-    init(id: UUID = UUID(), identifier: String, customLabel: String = "", symbol: String? = nil) {
+    /// When this row is at work, in its own local time. `nil` means the user
+    /// has not said, and the row shows no status rather than a guessed one.
+    var workingHours: WorkingHours?
+
+    init(
+        id: UUID = UUID(),
+        identifier: String,
+        customLabel: String = "",
+        symbol: String? = nil,
+        workingHours: WorkingHours? = nil
+    ) {
         self.id = id
         self.identifier = identifier
         self.customLabel = customLabel
         self.symbol = Self.sanitizedSymbol(symbol ?? TimeZoneCatalog.suggestedSymbol(for: identifier))
+        self.workingHours = workingHours
     }
 
     /// At most two glyphs, no whitespace or line breaks. Counting is by
@@ -57,6 +68,7 @@ nonisolated struct TimeZoneItem: Identifiable, Codable, Hashable, Sendable {
             try container.decodeIfPresent(String.self, forKey: .symbol)
                 ?? TimeZoneCatalog.suggestedSymbol(for: identifier)
         )
+        self.workingHours = try? container.decodeIfPresent(WorkingHours.self, forKey: .workingHours)
     }
 
     /// `nil` when the stored identifier is no longer present in the system

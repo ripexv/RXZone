@@ -26,6 +26,9 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     let isSystemZone: Bool
     /// `false` when the stored identifier is unknown to this macOS version.
     let isAvailable: Bool
+    /// Inside working hours at the displayed instant. `nil` when no hours are
+    /// set, which is not the same as "off" and must not be drawn as one.
+    let isWorking: Bool?
 
     /// Stable identity for the synthetic local row.
     static let localRowID = UUID(uuidString: "00000000-0000-0000-0000-00005A4F4E45")!
@@ -140,7 +143,8 @@ final class AppModel {
             subtitle: TimeZoneCatalog.cityName(for: zone.identifier),
             isLocal: true,
             isSystemZone: true,
-            isAvailable: true
+            isAvailable: true,
+            isWorking: nil
         )
     }
 
@@ -155,7 +159,10 @@ final class AppModel {
                 : String(localized: "Unavailable on this Mac", comment: "Time zone identifier is unknown"),
             isLocal: false,
             isSystemZone: item.identifier == clock.localTimeZone.identifier,
-            isAvailable: item.isAvailable
+            isAvailable: item.isAvailable,
+            // Read from `displayDate`, so dragging the time travel slider makes
+            // the status follow the hour the user is inspecting.
+            isWorking: item.workingHours?.isActive(at: displayDate, in: item.resolvedTimeZone)
         )
     }
 
