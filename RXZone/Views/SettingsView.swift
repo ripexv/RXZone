@@ -224,8 +224,6 @@ private struct TimeZoneSettingsView: View {
 
             Spacer(minLength: 8)
 
-            WorkingHoursField(hours: binding.workingHours, format: model.preferences.timeFormat)
-
             Text(DateFormatting.timeString(
                 for: model.displayDate,
                 in: item.resolvedTimeZone,
@@ -343,103 +341,6 @@ private struct EmojiField: View {
         .padding(12)
         .frame(width: 274)
         .onAppear { isFieldFocused = true }
-    }
-}
-
-/// Compact working-hours control: a summary in the list row, the editor behind
-/// a popover so the row itself stays readable.
-private struct WorkingHoursField: View {
-    @Binding var hours: WorkingHours?
-    let format: TimeFormat
-
-    @State private var isEditing = false
-
-    var body: some View {
-        Button {
-            isEditing = true
-        } label: {
-            Text(summary)
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(hours == nil ? .secondary : .primary)
-        }
-        .buttonStyle(.borderless)
-        .help(Text("Working hours for this zone", comment: "Tooltip"))
-        .popover(isPresented: $isEditing, arrowEdge: .bottom) { editor }
-    }
-
-    private var summary: String {
-        guard let hours else {
-            return String(localized: "Set hours…", comment: "Placeholder when no working hours are set")
-        }
-        return "\(label(hours.start))–\(label(hours.end))"
-    }
-
-    private var editor: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: isEnabled) {
-                Text("Working hours", comment: "Toggle in the working hours editor")
-            }
-
-            if hours != nil {
-                DatePicker(selection: time(\.start), displayedComponents: .hourAndMinute) {
-                    Text("From", comment: "Start of working hours")
-                }
-                DatePicker(selection: time(\.end), displayedComponents: .hourAndMinute) {
-                    Text("To", comment: "End of working hours")
-                }
-                Toggle(isOn: weekdaysOnly) {
-                    Text("Weekdays only", comment: "Skip Saturday and Sunday")
-                }
-
-                Text(hours?.wrapsMidnight == true
-                     ? String(localized: "Runs past midnight into the next day.",
-                              comment: "Explains an overnight shift")
-                     : String(localized: "In this zone's own local time.",
-                              comment: "Clarifies which clock the hours refer to"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(14)
-        .frame(width: 250)
-    }
-
-    // MARK: - Bindings
-
-    private var isEnabled: Binding<Bool> {
-        Binding(get: { hours != nil }, set: { hours = $0 ? WorkingHours() : nil })
-    }
-
-    private var weekdaysOnly: Binding<Bool> {
-        Binding(get: { hours?.weekdaysOnly ?? true }, set: { hours?.weekdaysOnly = $0 })
-    }
-
-    /// `DatePicker` speaks `Date`, the model stores minutes from midnight. The
-    /// anchor day is arbitrary and never leaves this binding.
-    private func time(_ keyPath: WritableKeyPath<WorkingHours, Int>) -> Binding<Date> {
-        Binding(
-            get: { date(fromMinutes: hours?[keyPath: keyPath] ?? 0) },
-            set: { newValue in
-                let parts = Calendar.current.dateComponents([.hour, .minute], from: newValue)
-                hours?[keyPath: keyPath] = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-            }
-        )
-    }
-
-    private func date(fromMinutes minutes: Int) -> Date {
-        var parts = DateComponents()
-        parts.year = 2000
-        parts.month = 1
-        parts.day = 1
-        parts.hour = minutes / 60
-        parts.minute = minutes % 60
-        return Calendar.current.date(from: parts) ?? Date()
-    }
-
-    private func label(_ minutes: Int) -> String {
-        DateFormatting.timeString(for: date(fromMinutes: minutes), in: .current, format: format)
     }
 }
 

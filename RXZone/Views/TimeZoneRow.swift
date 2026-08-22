@@ -24,16 +24,15 @@ struct TimeZoneRow: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
-                    // Filled while at work, hollow outside it. Nothing at all
-                    // when no hours are set — an empty ring would read as a
-                    // claim the app is not entitled to make.
-                    if let isWorking = row.isWorking {
-                        Image(systemName: isWorking ? "circle.fill" : "circle")
-                            .font(.system(size: 7))
-                            .foregroundStyle(isWorking ? Color.green : Color.secondary)
-                            .help(isWorking
-                                  ? Text("Working hours", comment: "Tooltip on the status dot")
-                                  : Text("Outside working hours", comment: "Tooltip on the status dot"))
+                    // Derived from the zone's own coordinates, so it needs no
+                    // setting and is right at any latitude in any season.
+                    if let isDaylight = row.isDaylight {
+                        Image(systemName: isDaylight ? "sun.max.fill" : "moon.fill")
+                            .font(.system(size: 9))
+                            .foregroundStyle(isDaylight ? Color.orange : Color.indigo)
+                            .help(isDaylight
+                                  ? Text("Daytime there", comment: "Tooltip on the sun icon")
+                                  : Text("Night there", comment: "Tooltip on the moon icon"))
                     }
 
                     Text(row.title)
@@ -122,10 +121,10 @@ struct TimeZoneRow: View {
 
     private var accessibilityLabel: Text {
         var spoken = "\(row.title), \(timeText), \(detail)"
-        if let isWorking = row.isWorking {
-            spoken += ", " + (isWorking
-                ? String(localized: "working hours", comment: "Spoken status")
-                : String(localized: "outside working hours", comment: "Spoken status"))
+        if let isDaylight = row.isDaylight {
+            spoken += ", " + (isDaylight
+                ? String(localized: "daytime", comment: "Spoken status")
+                : String(localized: "night", comment: "Spoken status"))
         }
         if let dayLabel { spoken += ", \(dayLabel)" }
         if isInMenuBar {
