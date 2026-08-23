@@ -19,6 +19,9 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     let symbol: String
     let title: String
     let subtitle: String
+    /// Localized city for the zone, kept separate from `title`. Renaming a row
+    /// to a person's name would otherwise erase every trace of where they are.
+    let city: String
     let isLocal: Bool
     /// True when this row runs on the Mac's own time zone. Set on the pinned
     /// local row and on any saved zone that happens to match it, so the marker
@@ -142,6 +145,7 @@ final class AppModel {
             symbol: TimeZoneCatalog.suggestedSymbol(for: zone.identifier),
             title: String(localized: "This Mac", comment: "Row for the Mac's own time zone"),
             subtitle: TimeZoneCatalog.cityName(for: zone.identifier),
+            city: TimeZoneCatalog.cityName(for: zone.identifier),
             isLocal: true,
             isSystemZone: true,
             isAvailable: true,
@@ -158,6 +162,7 @@ final class AppModel {
             subtitle: item.isAvailable
                 ? item.subtitle
                 : String(localized: "Unavailable on this Mac", comment: "Time zone identifier is unknown"),
+            city: item.isAvailable ? TimeZoneCatalog.cityName(for: item.identifier) : "",
             isLocal: false,
             isSystemZone: item.identifier == clock.localTimeZone.identifier,
             isAvailable: item.isAvailable,

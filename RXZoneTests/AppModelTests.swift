@@ -230,6 +230,44 @@ struct SystemZoneTests {
     }
 }
 
+@Suite("Renaming a row")
+struct RowRenamingTests {
+
+    @Test("A renamed row still carries the city it stands for")
+    func renamingKeepsTheCity() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [
+            TimeZoneItem(identifier: "America/Los_Angeles", customLabel: "John")
+        ]
+        let row = try! #require(model.rows.first { !$0.isLocal })
+
+        #expect(row.title == "John")
+        #expect(row.city == "Los Angeles", "Losing this is losing where John actually is")
+    }
+
+    @Test("An unrenamed row's title and city agree, so nothing prints twice")
+    func unrenamedRowDoesNotRepeatItself() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: "America/Los_Angeles")]
+        let row = try! #require(model.rows.first { !$0.isLocal })
+        #expect(row.title == row.city)
+    }
+
+    @Test("A zone this Mac cannot resolve claims no city")
+    func unavailableZoneHasNoCity() {
+        let (model, defaults, name) = makeModel()
+        defer { defaults.removePersistentDomain(forName: name) }
+
+        model.preferences.zones = [TimeZoneItem(identifier: "Mars/Olympus_Mons")]
+        let row = try! #require(model.rows.first { !$0.isLocal })
+        #expect(row.city.isEmpty, "Inventing a city for an unknown zone would be a guess")
+    }
+}
+
 @Suite("Menu bar highlighting")
 struct MenuBarHighlightTests {
 

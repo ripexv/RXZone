@@ -20,21 +20,13 @@ struct TimeZoneRow: View {
             Text(row.symbol)
                 .font(.title3)
                 // Emoji must not shrink when the row's text scales up.
-                .frame(minWidth: 24, alignment: .leading)
+                .frame(minWidth: 24, minHeight: 22, alignment: .leading)
+                // Badged onto the symbol rather than placed before the name:
+                // it belongs to the place, and the title line stays a title.
+                .overlay(alignment: .bottomTrailing) { daylightBadge }
 
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
-                    // Derived from the zone's own coordinates, so it needs no
-                    // setting and is right at any latitude in any season.
-                    if let isDaylight = row.isDaylight {
-                        Image(systemName: isDaylight ? "sun.max.fill" : "moon.fill")
-                            .font(.system(size: 9))
-                            .foregroundStyle(isDaylight ? Color.orange : Color.indigo)
-                            .help(isDaylight
-                                  ? Text("Daytime there", comment: "Tooltip on the sun icon")
-                                  : Text("Night there", comment: "Tooltip on the moon icon"))
-                    }
-
                     Text(row.title)
                         .fontWeight(.medium)
                         .lineLimit(1)
@@ -88,6 +80,24 @@ struct TimeZoneRow: View {
         .accessibilityLabel(accessibilityLabel)
     }
 
+    /// Sun or moon, derived from the zone's own coordinates, so it needs no
+    /// setting and holds at any latitude in any season. Carries a small opaque
+    /// disc behind it so it stays legible over whatever emoji it sits on.
+    @ViewBuilder
+    private var daylightBadge: some View {
+        if let isDaylight = row.isDaylight {
+            Image(systemName: isDaylight ? "sun.max.fill" : "moon.fill")
+                .font(.system(size: 8))
+                .foregroundStyle(isDaylight ? Color.orange : Color.indigo)
+                .padding(1.5)
+                .background(Circle().fill(.background))
+                .offset(x: 3, y: 2)
+                .help(isDaylight
+                      ? Text("Daytime there", comment: "Tooltip on the sun badge")
+                      : Text("Night there", comment: "Tooltip on the moon badge"))
+        }
+    }
+
     // MARK: - Derived text
 
     private var timeText: String {
@@ -104,6 +114,12 @@ struct TimeZoneRow: View {
     /// never loses its second line entirely.
     private var detail: String {
         var parts: [String] = []
+        // Only when the title is not already the city: a row renamed to "John"
+        // must still say Los Angeles somewhere, but an unrenamed row should not
+        // print the same word twice.
+        if !row.city.isEmpty, row.title != row.city {
+            parts.append(row.city)
+        }
         if preferences.showsDate {
             parts.append(DateFormatting.dateString(for: date, in: row.timeZone))
         }
