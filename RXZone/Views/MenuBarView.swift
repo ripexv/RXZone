@@ -10,6 +10,13 @@ import AppKit
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
     @State private var isAdding = false
+    /// Measured height of the clock list.
+    ///
+    /// A `ScrollView` has no height of its own — it accepts whatever it is
+    /// offered — while the `MenuBarExtra` panel sizes itself to its content.
+    /// Each waits for the other and the list resolves to zero, leaving a panel
+    /// with nothing in it but the footer. Measuring the content breaks the tie.
+    @State private var listHeight: CGFloat = 0
 
     private let width: CGFloat = 312
 
@@ -32,6 +39,13 @@ struct MenuBarView: View {
                     TimeTravelControl(model: model)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear
+                                .onAppear { listHeight = proxy.size.height }
+                                .onChange(of: proxy.size.height) { _, new in listHeight = new }
+                        }
+                    }
                 }
                 Divider()
                 footer
@@ -104,13 +118,32 @@ struct MenuBarView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear
+                                .onAppear { listHeight = proxy.size.height }
+                                .onChange(of: proxy.size.height) { _, new in listHeight = new }
+                        }
+                    }
                 }
                 // Grows with the list but never taller than a comfortable panel.
-                .frame(maxHeight: 360)
+                // The estimate covers only the first frame; once the content has
+                // been measured that number is used exactly, so an estimate that
+                // overshoots does not leave a permanent gap.
+                .frame(height: min(listHeight > 0 ? listHeight : estimatedHeight(for: rows.count), 360))
                 .scrollBounceBehavior(.basedOnSize)
             }
         }
     }
+
+    /// Stand-in used for the very first frame, before the list has been
+    /// measured, so the panel never opens visibly empty.
+    private func estimatedHeight(for rowCount: Int) -> CGFloat {
+        let row: CGFloat = preferences.showsDate || preferences.showsOffsetFromLocal ? 44 : 32
+        return CGFloat(rowCount) * row + 16
+    }
+
+    private var preferences: Preferences { model.preferences }
 
     private var travelBanner: some View {
         HStack(spacing: 6) {
