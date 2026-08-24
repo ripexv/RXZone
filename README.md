@@ -15,6 +15,7 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 
 - **Multiple clocks in the menu bar.** Pick any number of zones; they render side by side. New zones appear there automatically and can be unticked from the row's context menu.
 - **Time travel.** A −24h … +24h slider moves every clock to the same reference instant, so you can answer "if I schedule this at 16:00, what time is it for them?" It only changes what is displayed — the system clock is never touched.
+- **Day or night at a glance.** Every row carries a sun or a moon, worked out from the zone's own coordinates rather than a fixed night window — so it is right in Reykjavík in June and in Longyearbyen in December. Nothing to configure.
 - **Correct across DST.** All offsets and calendar-day differences come from `TimeZone` and `Calendar`, so daylight saving transitions are handled by Foundation rather than by hand-written rules.
 - **Full time zone database.** All 443 zones from `TimeZone.knownTimeZoneIdentifiers`, searchable by city, country, or region, with localized exemplar city names via ICU's `VVV` pattern.
 - **Search by the city you actually mean.** The tz database names each zone after one representative city, so Las Vegas, Boston, Munich and İzmir do not appear in it at all. RXZone adds ~145 search aliases: searching "New Jersey" finds the right zone, says plainly that it shares New York's, and labels the row "New Jersey". Aliases only widen search — they never invent a zone, and every alias is checked against the real database at startup.
@@ -69,7 +70,7 @@ xcodebuild test  -project RXZone.xcodeproj -scheme RXZone -destination 'platform
 
 RXZone is an `LSUIElement` agent: no Dock icon, no main window.
 
-95 tests aim at the parts most likely to be subtly wrong rather than the ones
+124 tests aim at the parts most likely to be subtly wrong rather than the ones
 easiest to reach — DST transitions in both hemispheres, calendar-day differences
 across year boundaries and 45-minute offsets, clock rendering that does not
 depend on the machine's locale, preference decoding from partial and malformed
@@ -95,7 +96,10 @@ RXZone/
 │                                AddTimeZoneView, TimeTravelControl, SettingsView
 └── Utilities/
     ├── DateFormatting.swift     Time/date/offset rendering
+    ├── SolarPosition.swift      Is the sun up there right now
+    ├── Emoji.swift              Emoji validation for row symbols
     ├── TimeZoneAliases.swift    Search aliases for places the tz database omits
+    ├── TimeZoneCoordinates.swift  Generated zone → latitude/longitude
     └── TimeZoneRegions.swift    Generated zone → ISO region map (flags only)
 ```
 
