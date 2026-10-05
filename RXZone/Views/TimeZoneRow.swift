@@ -58,6 +58,14 @@ struct TimeZoneRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                // Present only in the week before a change, so most of the year
+                // the row is exactly as it was.
+                if let clockChange {
+                    Text(clockChange)
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 8)
@@ -204,6 +212,10 @@ struct TimeZoneRow: View {
         return parts.isEmpty ? row.subtitle : parts.joined(separator: " · ")
     }
 
+    private var clockChange: String? {
+        DateFormatting.clockChangeNotice(for: row.timeZone, reference: reference, at: date)
+    }
+
     private var dayLabel: String? {
         guard !row.isLocal else { return nil }
         let delta = DateFormatting.dayDelta(at: date, zone: row.timeZone, reference: reference)
@@ -218,6 +230,7 @@ struct TimeZoneRow: View {
                 : String(localized: "night", comment: "Spoken status"))
         }
         if let dayLabel { spoken += ", \(dayLabel)" }
+        if let clockChange { spoken += ", \(clockChange)" }
         if isInMenuBar {
             spoken += ", " + String(localized: "shown in the menu bar",
                                     comment: "Spoken for a row mirrored into the menu bar")

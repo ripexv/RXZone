@@ -134,6 +134,61 @@ enum DateFormatting {
         return lines.joined(separator: "\n")
     }
 
+    // MARK: - Clock changes
+
+    /// A short warning when `zone` is about to change its clocks, or `nil`.
+    ///
+    /// The week before a daylight saving change is when meetings slip: one side
+    /// moves and the other does not, so the gap between them changes for a week
+    /// or more. The notice therefore also states the gap before and after, when
+    /// it changes — "−7h → −8h" — because that is the number people schedule by.
+    /// Transitions come from the tz database via Foundation; nothing here knows
+    /// any country's rules.
+    static func clockChangeNotice(
+        for zone: TimeZone,
+        reference: TimeZone,
+        at date: Date,
+        within days: Int = 7
+    ) -> String? {
+        guard let change = zone.nextDaylightSavingTimeTransition(after: date),
+              change.timeIntervalSince(date) <= Double(days) * 86_400
+        else { return nil }
+
+        let shift = zone.secondsFromGMT(for: change.addingTimeInterval(1))
+            - zone.secondsFromGMT(for: change.addingTimeInterval(-1))
+        guard shift != 0 else { return nil }
+
+        // Spoken in the zone's own calendar: "on Sun" there, whatever day it is here.
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = zone
+        let daysAway = calendar.dateComponents(
+            [.day], from: calendar.startOfDay(for: date), to: calendar.startOfDay(for: change)
+        ).day ?? 0
+        let when: String
+        switch daysAway {
+        case 0: when = String(localized: "today", comment: "Clock change happens today")
+        case 1: when = String(localized: "tomorrow", comment: "Clock change happens tomorrow")
+        default:
+            let weekday = change.formatted(
+                Date.FormatStyle(locale: .current, timeZone: zone).weekday(.abbreviated))
+            when = String(localized: "on \(weekday)", comment: "Clock change happens on a weekday, e.g. on Sun")
+        }
+
+        let amount = durationLabel(minutes: abs(shift) / 60)
+        var notice = shift > 0
+            ? String(localized: "Clocks go forward \(amount) \(when)", comment: "DST starts soon")
+            : String(localized: "Clocks go back \(amount) \(when)", comment: "DST ends soon")
+
+        // Only worth saying when the gap actually moves: two zones that change
+        // on the same night keep the same distance.
+        if zone.identifier != reference.identifier {
+            let before = offsetLabel(of: zone, from: reference, at: change.addingTimeInterval(-1))
+            let after = offsetLabel(of: zone, from: reference, at: change.addingTimeInterval(1))
+            if before != after { notice += " · \(before) → \(after)" }
+        }
+        return notice
+    }
+
     // MARK: - Offsets
 
     /// Difference between two zones at a given instant, e.g. `+3h`, `-5h30m`.
