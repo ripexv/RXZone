@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 
 ## Features
 
-- **Multiple clocks in the menu bar.** Pick any number of zones; they render side by side. New zones appear there automatically and can be unticked from the row's context menu.
+- **Multiple clocks in the menu bar.** Pick any number of zones; they render side by side. New zones appear there automatically and can be unticked from the row's context menu. When several share the bar, a short style keeps them narrow: `IST 17:00 · LON 15:00 · NY 10:00`.
 - **Time travel.** A −24h … +24h slider moves every clock to the same reference instant, so you can answer "if I schedule this at 16:00, what time is it for them?" It only changes what is displayed — the system clock is never touched.
 - **Type a time anywhere.** Click any row's clock and type `10:00` — or `10am`, `1030`, `10.30` — and every other clock jumps to that moment. "They said 10 their time" becomes one click instead of dragging a slider in 15-minute steps.
 - **Day or night at a glance.** Every row carries a sun or a moon, worked out from the zone's own coordinates rather than a fixed night window — so it is right in Reykjavík in June and in Longyearbyen in December. Nothing to configure.
@@ -72,7 +72,7 @@ xcodebuild test  -project RXZone.xcodeproj -scheme RXZone -destination 'platform
 
 RXZone is an `LSUIElement` agent: no Dock icon, no main window.
 
-146 tests aim at the parts most likely to be subtly wrong rather than the ones
+154 tests aim at the parts most likely to be subtly wrong rather than the ones
 easiest to reach — DST transitions in both hemispheres, calendar-day differences
 across year boundaries and 45-minute offsets, clock rendering that does not
 depend on the machine's locale, preference decoding from partial and malformed
@@ -99,6 +99,8 @@ RXZone/
 └── Utilities/
     ├── DateFormatting.swift     Time/date/offset rendering
     ├── SolarPosition.swift      Is the sun up there right now
+    ├── ShortCode.swift          IST / LON / NY codes for the compact menu bar
+    ├── TimeInput.swift          Parses typed times: 10, 10:30, 1030, 10am
     ├── Emoji.swift              Emoji validation for row symbols
     ├── TimeZoneAliases.swift    Search aliases for places the tz database omits
     ├── TimeZoneCoordinates.swift  Generated zone → latitude/longitude

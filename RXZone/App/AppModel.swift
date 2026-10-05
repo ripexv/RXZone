@@ -283,7 +283,17 @@ final class AppModel {
         // A leading marker makes an active time travel offset obvious even
         // while the popover is closed.
         let prefix = isTimeTravelling ? "⏱ " : ""
-        return prefix + menuBarRows.map(menuBarClock(for:)).joined(separator: "   ")
+        let rows = menuBarRows
+
+        if preferences.menuBarStyle == .codeAndTime {
+            // Codes are worked out for the whole set at once, so two rows that
+            // would share one are told apart.
+            let codes = ShortCode.codes(for: rows.map(codeSource(for:)))
+            return prefix + zip(codes, rows)
+                .map { "\($0) \(menuBarTime(for: $1))" }
+                .joined(separator: " · ")
+        }
+        return prefix + rows.map(menuBarClock(for:)).joined(separator: "   ")
     }
 
     /// Time zones the menu bar is currently displaying.
@@ -319,7 +329,17 @@ final class AppModel {
         case .time: time
         case .symbolAndTime: "\(row.symbol) \(time)"
         case .labelAndTime: "\(row.title) \(time)"
+        case .codeAndTime: "\(ShortCode.code(for: codeSource(for: row))) \(time)"
         }
+    }
+
+    /// What a short code is made from: the user's own name for a renamed row,
+    /// the city otherwise. The pinned local row is titled "This Mac", which
+    /// would make a code nobody could read, so it always uses its city.
+    private func codeSource(for row: ZoneRow) -> String {
+        if row.isLocal, !row.city.isEmpty { return row.city }
+        // An unrenamed row is titled with its city already.
+        return row.title
     }
 
     /// Whether a row is currently visible in the menu bar, taking the implicit

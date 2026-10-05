@@ -21,7 +21,7 @@ struct MenuBarLabel: View {
         case .icon:
             Image(systemName: "globe")
                 .accessibilityLabel(Text("RXZone time zones", comment: "Menu bar icon description"))
-        case .time, .symbolAndTime, .labelAndTime:
+        case .time, .symbolAndTime, .labelAndTime, .codeAndTime:
             Text(model.menuBarText)
                 .monospacedDigit()
                 .accessibilityLabel(Text(model.menuBarAccessibilityText))

@@ -38,6 +38,9 @@ nonisolated enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Send
     case time
     case symbolAndTime
     case labelAndTime
+    /// Two- to four-letter codes: `IST 17:00 · LON 15:00`. For when several
+    /// clocks share the menu bar and full names no longer fit.
+    case codeAndTime
 
     var id: String { rawValue }
 
@@ -47,6 +50,7 @@ nonisolated enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Send
         case .time: String(localized: "Time", comment: "Menu bar appearance option")
         case .symbolAndTime: String(localized: "Emoji and time", comment: "Menu bar appearance option")
         case .labelAndTime: String(localized: "Name and time", comment: "Menu bar appearance option")
+        case .codeAndTime: String(localized: "Short name and time", comment: "Menu bar appearance option")
         }
     }
 
