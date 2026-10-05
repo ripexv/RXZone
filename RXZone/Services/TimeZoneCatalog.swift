@@ -30,7 +30,7 @@ nonisolated enum TimeZoneCatalog {
 
     /// Case- and diacritic-insensitive form used for every comparison.
     private static func fold(_ text: String) -> String {
-        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: AppLanguage.locale)
     }
 
     /// All selectable zones, sorted by their localized city name.
@@ -97,11 +97,11 @@ nonisolated enum TimeZoneCatalog {
         // `VVV` is the Unicode "exemplar city" pattern, which gives a properly
         // localized city name straight from ICU instead of a hand-made table.
         let cityFormatter = DateFormatter()
-        cityFormatter.locale = .current
+        cityFormatter.locale = AppLanguage.locale
         cityFormatter.dateFormat = "VVV"
 
         let now = Date()
-        let locale = Locale.current
+        let locale = AppLanguage.locale
 
         let entries: [Entry] = TimeZone.knownTimeZoneIdentifiers.compactMap { identifier in
             guard let timeZone = TimeZone(identifier: identifier) else { return nil }

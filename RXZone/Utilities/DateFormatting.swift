@@ -57,7 +57,7 @@ enum DateFormatting {
 
     /// e.g. `Friday, Aug 14` — weekday and month order follow the user's locale.
     static func dateString(for date: Date, in timeZone: TimeZone) -> String {
-        let style = Date.FormatStyle(locale: .current, timeZone: timeZone)
+        let style = Date.FormatStyle(locale: AppLanguage.locale, timeZone: timeZone)
             .weekday(.wide)
             .month(.abbreviated)
             .day()
@@ -170,7 +170,7 @@ enum DateFormatting {
         case 1: when = String(localized: "tomorrow", comment: "Clock change happens tomorrow")
         default:
             let weekday = change.formatted(
-                Date.FormatStyle(locale: .current, timeZone: zone).weekday(.abbreviated))
+                Date.FormatStyle(locale: AppLanguage.locale, timeZone: zone).weekday(.abbreviated))
             when = String(localized: "on \(weekday)", comment: "Clock change happens on a weekday, e.g. on Sun")
         }
 
@@ -216,10 +216,12 @@ enum DateFormatting {
     private static func durationLabel(minutes: Int, separator: String = "") -> String {
         let hours = minutes / 60
         let remainder = minutes % 60
+        let hoursText = String(localized: "\(hours)h", comment: "Hours, abbreviated: 3h")
+        let minutesText = String(localized: "\(remainder)m", comment: "Minutes, abbreviated: 15m")
         switch (hours, remainder) {
-        case (0, let value): return "\(value)m"
-        case (let value, 0): return "\(value)h"
-        case (let hour, let value): return "\(hour)h\(separator)\(value)m"
+        case (0, _): return minutesText
+        case (_, 0): return hoursText
+        default: return hoursText + separator + minutesText
         }
     }
 
@@ -230,10 +232,10 @@ enum DateFormatting {
     private static var localeCache: [TimeFormat: Locale] = [:]
 
     private static func locale(for format: TimeFormat) -> Locale {
-        guard let hourCycle = format.hourCycle else { return .current }
+        guard let hourCycle = format.hourCycle else { return AppLanguage.locale }
         if let cached = localeCache[format] { return cached }
 
-        var components = Locale.Components(locale: .current)
+        var components = Locale.Components(locale: AppLanguage.locale)
         components.hourCycle = hourCycle
         let locale = Locale(components: components)
         localeCache[format] = locale

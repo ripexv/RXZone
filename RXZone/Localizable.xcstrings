@@ -1,0 +1,1323 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ in %@ · %@": {
+      "comment": "Banner after typing a time into a row: time, row name, offset from now",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ in %2$@ · %3$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ saatiyle %1$@ · %3$@"
+          }
+        }
+      }
+    },
+    "%@, already added": {
+      "comment": "Accessibility label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, zaten ekli"
+          }
+        }
+      }
+    },
+    "%lld days": {
+      "comment": "Zone is several days behind",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld gün"
+          }
+        }
+      }
+    },
+    "%lldh": {
+      "comment": "Hours, abbreviated: 3h",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sa"
+          }
+        }
+      }
+    },
+    "%lldm": {
+      "comment": "Minutes, abbreviated: 15m",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld dk"
+          }
+        }
+      }
+    },
+    "+%lld days": {
+      "comment": "Zone is several days ahead",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld gün"
+          }
+        }
+      }
+    },
+    "1 hour": {
+      "comment": "Time travel step size",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 saat"
+          }
+        }
+      }
+    },
+    "12-hour": {
+      "comment": "Time format option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 saat"
+          }
+        }
+      }
+    },
+    "15 minutes": {
+      "comment": "Time travel step size",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 dakika"
+          }
+        }
+      }
+    },
+    "24-hour": {
+      "comment": "Time format option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 saat"
+          }
+        }
+      }
+    },
+    "30 minutes": {
+      "comment": "Time travel step size",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 dakika"
+          }
+        }
+      }
+    },
+    "5 minutes": {
+      "comment": "Time travel step size",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 dakika"
+          }
+        }
+      }
+    },
+    "Add %@ · %@": {
+      "comment": "Tooltip to add a zone",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Add %1$@ · %2$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ekle · %2$@"
+          }
+        }
+      }
+    },
+    "Add %@, %@": {
+      "comment": "Accessibility label",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Add %1$@, %2$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ ekle, %2$@"
+          }
+        }
+      }
+    },
+    "Add Time Zone…": {
+      "comment": "Popover footer button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat Dilimi Ekle…"
+          }
+        }
+      }
+    },
+    "Add a city to start tracking it.": {
+      "comment": "Empty state subtitle",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takip etmek için bir şehir ekleyin."
+          }
+        }
+      }
+    },
+    "Add a time zone": {
+      "comment": "Button\nTooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat dilimi ekle"
+          }
+        }
+      }
+    },
+    "Already added · %@": {
+      "comment": "Tooltip for a zone in the list",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaten ekli · %@"
+          }
+        }
+      }
+    },
+    "Another app is already using this shortcut.": {
+      "comment": "Shown when the hot key could not be claimed",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu kısayol başka bir uygulama tarafından kullanılıyor."
+          }
+        }
+      }
+    },
+    "Back": {
+      "comment": "Navigate out of the picker",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri"
+          }
+        }
+      }
+    },
+    "Behaviour": {
+      "comment": "Settings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Davranış"
+          }
+        }
+      }
+    },
+    "Choose an emoji": {
+      "comment": "Button\nTooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji seç"
+          }
+        }
+      }
+    },
+    "Clear search": {
+      "comment": "Button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aramayı temizle"
+          }
+        }
+      }
+    },
+    "Clocks go back %@ %@": {
+      "comment": "DST ends soon",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Clocks go back %1$@ %2$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saatler %2$@ %1$@ geri alınıyor"
+          }
+        }
+      }
+    },
+    "Clocks go forward %@ %@": {
+      "comment": "DST starts soon",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Clocks go forward %1$@ %2$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saatler %2$@ %1$@ ileri alınıyor"
+          }
+        }
+      }
+    },
+    "Copy All Times": {
+      "comment": "Context menu action",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüm Saatleri Kopyala"
+          }
+        }
+      }
+    },
+    "Copy Time": {
+      "comment": "Context menu action",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saati Kopyala"
+          }
+        }
+      }
+    },
+    "Couldn’t update the login item: %@": {
+      "comment": "Login item registration failed",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giriş öğesi güncellenemedi: %@"
+          }
+        }
+      }
+    },
+    "Current offset": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçerli fark"
+          }
+        }
+      }
+    },
+    "Custom emoji": {
+      "comment": "Accessibility label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel emoji"
+          }
+        }
+      }
+    },
+    "Daytime there": {
+      "comment": "Tooltip on the sun badge",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orada gündüz"
+          }
+        }
+      }
+    },
+    "Drag to reorder. Leave a name empty to use the city name.": {
+      "comment": "Hint under the time zone list",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sıralamak için sürükleyin. Şehir adını kullanmak için ismi boş bırakın."
+          }
+        }
+      }
+    },
+    "Emoji and time": {
+      "comment": "Menu bar appearance option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji ve saat"
+          }
+        }
+      }
+    },
+    "General": {
+      "comment": "Settings tab",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genel"
+          }
+        }
+      }
+    },
+    "Globe icon": {
+      "comment": "Menu bar preview for icon-only mode",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dünya simgesi"
+          }
+        }
+      }
+    },
+    "Go back one hour": {
+      "comment": "Time travel step button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir saat geri git"
+          }
+        }
+      }
+    },
+    "Go forward one hour": {
+      "comment": "Time travel step button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir saat ileri git"
+          }
+        }
+      }
+    },
+    "Icon only": {
+      "comment": "Menu bar appearance option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca simge"
+          }
+        }
+      }
+    },
+    "Keyboard": {
+      "comment": "Settings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klavye"
+          }
+        }
+      }
+    },
+    "Language": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dil"
+          }
+        }
+      }
+    },
+    "Menu Bar": {
+      "comment": "Settings tab",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü Çubuğu"
+          }
+        }
+      }
+    },
+    "Menu Bar Item": {
+      "comment": "Settings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü Çubuğu Öğesi"
+          }
+        }
+      }
+    },
+    "Name": {
+      "comment": "Field label for the custom zone name",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İsim"
+          }
+        }
+      }
+    },
+    "Name and time": {
+      "comment": "Menu bar appearance option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İsim ve saat"
+          }
+        }
+      }
+    },
+    "New time zones are added here automatically. Untick any you would rather keep in the popover only — or right-click the row in the popover.": {
+      "comment": "Explains multi-zone menu bar selection",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeni saat dilimleri buraya otomatik olarak eklenir. Yalnızca açılır pencerede kalmasını istediklerinizin işaretini kaldırın — ya da pencerede satıra sağ tıklayın."
+          }
+        }
+      }
+    },
+    "Night there": {
+      "comment": "Tooltip on the moon badge",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orada gece"
+          }
+        }
+      }
+    },
+    "No matches": {
+      "comment": "Empty search result title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonuç yok"
+          }
+        }
+      }
+    },
+    "No time zones added yet.": {
+      "comment": "Empty list message",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz saat dilimi eklenmedi."
+          }
+        }
+      }
+    },
+    "No time zones yet": {
+      "comment": "Empty state title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz saat dilimi yok"
+          }
+        }
+      }
+    },
+    "Now": {
+      "comment": "Returns from time travel to the present\nTime travel slider is at the present moment",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi"
+          }
+        }
+      }
+    },
+    "Off": {
+      "comment": "No global shortcut",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapalı"
+          }
+        }
+      }
+    },
+    "Open RXZone at login": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Girişte RXZone’u aç"
+          }
+        }
+      }
+    },
+    "Open System Settings › General › Login Items to allow RXZone to open at login.": {
+      "comment": "Login item needs user approval",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RXZone’un girişte açılmasına izin vermek için Sistem Ayarları › Genel › Giriş Öğeleri bölümünü açın."
+          }
+        }
+      }
+    },
+    "Opens and closes the popover from anywhere. If another app already owns the combination, RXZone leaves it alone.": {
+      "comment": "Explains global shortcut behaviour",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açılır pencereyi her yerden açıp kapatır. Kombinasyon başka bir uygulamaya aitse RXZone ona dokunmaz."
+          }
+        }
+      }
+    },
+    "Paste any emoji": {
+      "comment": "Field prompt",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herhangi bir emoji yapıştırın"
+          }
+        }
+      }
+    },
+    "Popover": {
+      "comment": "Settings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açılır Pencere"
+          }
+        }
+      }
+    },
+    "Press Control-Command-Space for the system emoji picker.": {
+      "comment": "Hint about the macOS emoji palette",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem emoji seçicisi için Control-Komut-Boşluk tuşlarına basın."
+          }
+        }
+      }
+    },
+    "Preview": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önizleme"
+          }
+        }
+      }
+    },
+    "Quit RXZone": {
+      "comment": "Button\nTooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RXZone’dan Çık"
+          }
+        }
+      }
+    },
+    "RXZone time zones": {
+      "comment": "Menu bar icon description",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RXZone saat dilimleri"
+          }
+        }
+      }
+    },
+    "Remove %@": {
+      "comment": "Context menu action",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaldır: %@"
+          }
+        }
+      }
+    },
+    "Remove the selected time zone": {
+      "comment": "Tooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seçili saat dilimini kaldır"
+          }
+        }
+      }
+    },
+    "Remove time zone": {
+      "comment": "Button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat dilimini kaldır"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "comment": "Clears a custom emoji back to the region flag",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sıfırla"
+          }
+        }
+      }
+    },
+    "Reset All Settings": {
+      "comment": "Button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tüm Ayarları Sıfırla"
+          }
+        }
+      }
+    },
+    "Reset to now": {
+      "comment": "Reset button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdiye dön"
+          }
+        }
+      }
+    },
+    "Restart Now": {
+      "comment": "Relaunches the app to apply the language",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi Yeniden Başlat"
+          }
+        }
+      }
+    },
+    "Restart RXZone to switch language.": {
+      "comment": "Shown after changing the language",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dili değiştirmek için RXZone’u yeniden başlatın."
+          }
+        }
+      }
+    },
+    "Return to Now": {
+      "comment": "Button",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdiye Dön"
+          }
+        }
+      }
+    },
+    "Return to now when the popover closes": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pencere kapanınca şimdiye dön"
+          }
+        }
+      }
+    },
+    "Return to the current time": {
+      "comment": "Reset button tooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçerli saate dön"
+          }
+        }
+      }
+    },
+    "Same time": {
+      "comment": "Zone has no offset from the reference zone",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aynı saat"
+          }
+        }
+      }
+    },
+    "Same zone as %@": {
+      "comment": "Shown when a searched city shares another city's time zone",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ile aynı saat dilimi"
+          }
+        }
+      }
+    },
+    "Search cities or regions": {
+      "comment": "Search field placeholder",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şehir veya bölge ara"
+          }
+        }
+      }
+    },
+    "Search time zones": {
+      "comment": "Search field accessibility label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat dilimlerinde ara"
+          }
+        }
+      }
+    },
+    "Set a time here": {
+      "comment": "Accessibility action",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burada bir saat ayarla"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "comment": "Button\nTooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayarlar"
+          }
+        }
+      }
+    },
+    "Short name and time": {
+      "comment": "Menu bar appearance option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kısa ad ve saat"
+          }
+        }
+      }
+    },
+    "Show": {
+      "comment": "Setting label for menu bar appearance",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Göster"
+          }
+        }
+      }
+    },
+    "Show in Menu Bar": {
+      "comment": "Context menu toggle\nSettings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü Çubuğunda Göster"
+          }
+        }
+      }
+    },
+    "Show offset from local time": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel saate göre farkı göster"
+          }
+        }
+      }
+    },
+    "Show seconds": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saniyeleri göster"
+          }
+        }
+      }
+    },
+    "Show the slider in the popover": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydırıcıyı açılır pencerede göster"
+          }
+        }
+      }
+    },
+    "Show this Mac’s time zone": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Mac’in saat dilimini göster"
+          }
+        }
+      }
+    },
+    "Show weekday and date": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gün ve tarihi göster"
+          }
+        }
+      }
+    },
+    "Showing %@ from now": {
+      "comment": "Banner shown while time travelling",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şu andan %@ farkla gösteriliyor"
+          }
+        }
+      }
+    },
+    "Showing seconds updates the clock once a second instead of once a minute.": {
+      "comment": "Explains the power cost of showing seconds",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saniyeleri göstermek saati dakikada bir yerine saniyede bir günceller."
+          }
+        }
+      }
+    },
+    "Shown in the menu bar": {
+      "comment": "Tooltip on a highlighted row",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü çubuğunda gösteriliyor"
+          }
+        }
+      }
+    },
+    "Slider steps": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydırıcı adımları"
+          }
+        }
+      }
+    },
+    "Startup": {
+      "comment": "Settings section title",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç"
+          }
+        }
+      }
+    },
+    "System": {
+      "comment": "Time format option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem"
+          }
+        }
+      }
+    },
+    "System Default": {
+      "comment": "Language option: follow macOS",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem Varsayılanı"
+          }
+        }
+      }
+    },
+    "The slider spans 24 hours back to 24 hours ahead. It only changes what RXZone displays — your Mac’s clock is never modified.": {
+      "comment": "Explains that time travel is display-only",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydırıcı 24 saat geriden 24 saat ileriye uzanır. Yalnızca RXZone’un gösterdiğini değiştirir — Mac’inizin saati asla değiştirilmez."
+          }
+        }
+      }
+    },
+    "This Mac": {
+      "comment": "Row for the Mac's own time zone",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Mac"
+          }
+        }
+      }
+    },
+    "This Mac’s time zone": {
+      "comment": "Menu bar toggle for the local clock\nTooltip on the system zone row",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Mac’in saat dilimi"
+          }
+        }
+      }
+    },
+    "Time": {
+      "comment": "Menu bar appearance option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat"
+          }
+        }
+      }
+    },
+    "Time Travel": {
+      "comment": "Section title for the time offset slider\nSettings tab",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaman Yolculuğu"
+          }
+        }
+      }
+    },
+    "Time Zones": {
+      "comment": "Settings tab",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat Dilimleri"
+          }
+        }
+      }
+    },
+    "Time format": {
+      "comment": "Setting label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat biçimi"
+          }
+        }
+      }
+    },
+    "Time in %@": {
+      "comment": "Accessibility label for the time field",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ saati"
+          }
+        }
+      }
+    },
+    "Time offset": {
+      "comment": "Slider accessibility label",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaman farkı"
+          }
+        }
+      }
+    },
+    "Time travel": {
+      "comment": "Button\nTooltip",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaman yolculuğu"
+          }
+        }
+      }
+    },
+    "Toggle shortcut": {
+      "comment": "Setting label for the global keyboard shortcut",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aç/kapat kısayolu"
+          }
+        }
+      }
+    },
+    "Tomorrow": {
+      "comment": "Zone is one day ahead",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarın"
+          }
+        }
+      }
+    },
+    "Try a city, country, or region name.": {
+      "comment": "Empty search result hint",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir şehir, ülke veya bölge adı deneyin."
+          }
+        }
+      }
+    },
+    "Type a time in %@ to see it everywhere": {
+      "comment": "Tooltip on a row's time",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ saatine göre bir saat yazın, tüm saatler ona kayar"
+          }
+        }
+      }
+    },
+    "Unavailable on this Mac": {
+      "comment": "Time zone identifier is unknown",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Mac’te kullanılamıyor"
+          }
+        }
+      }
+    },
+    "Yesterday": {
+      "comment": "Zone is one day behind",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dün"
+          }
+        }
+      }
+    },
+    "daytime": {
+      "comment": "Spoken status",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gündüz"
+          }
+        }
+      }
+    },
+    "macOS already shows local time in its own clock, so this row is optional. It reappears while time travelling, because the system clock does not move with the slider. It is also hidden automatically when this Mac’s zone is already in your list.": {
+      "comment": "Explains when the local row is shown",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS yerel saati zaten kendi saatinde gösterir, bu yüzden bu satır isteğe bağlıdır. Sistem saati kaydırıcıyla hareket etmediği için zaman yolculuğu sırasında yeniden görünür. Bu Mac’in saat dilimi listenizde zaten varsa otomatik olarak gizlenir."
+          }
+        }
+      }
+    },
+    "night": {
+      "comment": "Spoken status",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gece"
+          }
+        }
+      }
+    },
+    "on %@": {
+      "comment": "Clock change happens on a weekday, e.g. on Sun",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ günü"
+          }
+        }
+      }
+    },
+    "shown in the menu bar": {
+      "comment": "Spoken for a row mirrored into the menu bar",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "menü çubuğunda gösteriliyor"
+          }
+        }
+      }
+    },
+    "today": {
+      "comment": "Clock change happens today",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bugün"
+          }
+        }
+      }
+    },
+    "tomorrow": {
+      "comment": "Clock change happens tomorrow",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "yarın"
+          }
+        }
+      }
+    },
+    "unavailable": {
+      "comment": "Spoken for an unknown time zone",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kullanılamıyor"
+          }
+        }
+      }
+    },
+    "“System” follows the 24-hour setting in System Settings › General › Date & Time.": {
+      "comment": "Explains the system time format option",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Sistem”, Sistem Ayarları › Genel › Tarih ve Saat bölümündeki 24 saat ayarını izler."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

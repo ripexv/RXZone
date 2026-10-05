@@ -57,9 +57,37 @@ struct SettingsView: View {
 
 private struct GeneralSettingsView: View {
     @Bindable var model: AppModel
+    @State private var language = AppLanguage.selected
 
     var body: some View {
         Form {
+            Section {
+                Picker(selection: $language) {
+                    ForEach(AppLanguage.allCases) { option in
+                        Text(verbatim: option.nativeName).tag(option)
+                    }
+                } label: {
+                    Text("Language", comment: "Setting label")
+                }
+                .onChange(of: language) { _, new in AppLanguage.select(new) }
+
+                // The bundle picks its strings at launch, so a new choice needs
+                // one. Offered here rather than forced, and only when it matters.
+                if language != AppLanguage.launched {
+                    HStack {
+                        Text("Restart RXZone to switch language.", comment: "Shown after changing the language")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            AppLanguage.relaunch()
+                        } label: {
+                            Text("Restart Now", comment: "Relaunches the app to apply the language")
+                        }
+                    }
+                }
+            }
+
             Section {
                 Picker(selection: $model.preferences.timeFormat) {
                     ForEach(TimeFormat.allCases) { format in

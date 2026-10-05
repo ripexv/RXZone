@@ -23,6 +23,7 @@ https://github.com/user-attachments/assets/45f6c1e0-5564-43c4-85c6-a281429e324c
 - **Search by the city you actually mean.** The tz database names each zone after one representative city, so Las Vegas, Boston, Munich and İzmir do not appear in it at all. RXZone adds ~145 search aliases: searching "New Jersey" finds the right zone, says plainly that it shares New York's, and labels the row "New Jersey". Aliases only widen search — they never invent a zone, and every alias is checked against the real database at startup.
 - **Custom labels and emoji** per zone, with a flag suggested automatically from the zone's region.
 - **12/24-hour clock**, following the system setting by default.
+- **English and Turkish**, chosen in Settings independently of the Mac's own language. Weekdays and city names follow the choice too, not just the buttons.
 - **Drag to reorder**, launch at login via `SMAppService`, and an optional global shortcut.
 
 ## Install
@@ -72,7 +73,7 @@ xcodebuild test  -project RXZone.xcodeproj -scheme RXZone -destination 'platform
 
 RXZone is an `LSUIElement` agent: no Dock icon, no main window.
 
-154 tests aim at the parts most likely to be subtly wrong rather than the ones
+160 tests aim at the parts most likely to be subtly wrong rather than the ones
 easiest to reach — DST transitions in both hemispheres, calendar-day differences
 across year boundaries and 45-minute offsets, clock rendering that does not
 depend on the machine's locale, preference decoding from partial and malformed
@@ -97,6 +98,7 @@ RXZone/
 ├── Views/                       MenuBarLabel, MenuBarView, TimeZoneRow,
 │                                AddTimeZoneView, TimeTravelControl, SettingsView
 └── Utilities/
+    ├── AppLanguage.swift        In-app language choice and the locale it implies
     ├── DateFormatting.swift     Time/date/offset rendering
     ├── SolarPosition.swift      Is the sun up there right now
     ├── ShortCode.swift          IST / LON / NY codes for the compact menu bar
