@@ -57,8 +57,28 @@ final class AppModel {
     /// Time travel offset in minutes. Deliberately not persisted — the app
     /// should always open showing the real current time.
     var travelMinutes: Double = 0 {
-        didSet { syncClockGranularity() }
+        didSet {
+            // Any change to the offset — the slider, the step buttons, a reset —
+            // means the user has moved on from a time they typed.
+            pin = nil
+            syncClockGranularity()
+        }
     }
+
+    /// A time the user typed into one row, held as a fixed instant.
+    ///
+    /// The slider stores an offset from now, which is right for a slider: "+3h"
+    /// should stay three hours ahead as the clock moves. A typed "10:00" is a
+    /// different promise — it must still read 10:00 a minute later, not 10:01 —
+    /// so it is kept as the instant itself rather than as an offset.
+    struct TravelPin: Equatable {
+        let date: Date
+        /// The row the time was typed into, so the panel can say "10:00 in London".
+        let title: String
+        let timeZone: TimeZone
+    }
+
+    private(set) var pin: TravelPin?
 
     /// Whether the menu bar popover is currently on screen.
     var isPopoverOpen: Bool = false
@@ -94,10 +114,52 @@ final class AppModel {
     /// The instant every row renders. Equals "now" unless the user is time
     /// travelling; the system clock is never modified.
     var displayDate: Date {
-        clock.now.addingTimeInterval(travelMinutes * 60)
+        pin?.date ?? clock.now.addingTimeInterval(travelMinutes * 60)
     }
 
-    var isTimeTravelling: Bool { travelMinutes != 0 }
+    var isTimeTravelling: Bool { pin != nil || travelMinutes != 0 }
+
+    /// The offset currently shown, in whole minutes. Derived from the pin when
+    /// there is one, so labels stay truthful as the real clock moves underneath.
+    var travelOffsetMinutes: Int {
+        if let pin { return Int((pin.date.timeIntervalSince(clock.now) / 60).rounded()) }
+        return Int(travelMinutes)
+    }
+
+    /// Jumps every clock to the moment a given row next reads `minuteOfDay`.
+    ///
+    /// "Next" because the question behind it is almost always scheduling —
+    /// "they said 10:00, what is that for everyone?" — so 10:00 typed at 11:00
+    /// means tomorrow morning, not an hour ago. The current minute counts as
+    /// now, so typing the time already on screen changes nothing. Daylight
+    /// saving gaps are left to `Calendar`: a time that does not exist that day
+    /// lands on the next one that does.
+    func travel(toMinuteOfDay minuteOfDay: Int, in timeZone: TimeZone, title: String) {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let now = clock.now
+        guard let target = calendar.nextDate(
+            after: now.addingTimeInterval(-60),
+            matching: DateComponents(hour: minuteOfDay / 60, minute: minuteOfDay % 60, second: 0),
+            matchingPolicy: .nextTime
+        ) else { return }
+
+        // Within the current minute is "now". Judged in seconds, not in rounded
+        // minutes: at 10:23:40, typing 10:23 targets 10:23:00, forty seconds
+        // back, which rounds to a full minute and would otherwise count as
+        // travelling into the past.
+        let seconds = target.timeIntervalSince(now)
+        guard abs(seconds) >= 60 else {
+            resetTravel()
+            return
+        }
+
+        // Keep the slider in step, then pin. Order matters: setting the offset
+        // clears any earlier pin.
+        let offset = (seconds / 60).rounded()
+        travelMinutes = min(max(offset, Self.travelRange.lowerBound), Self.travelRange.upperBound)
+        pin = TravelPin(date: target, title: title, timeZone: timeZone)
+    }
 
     /// Zone that offsets and day differences are measured against.
     var referenceTimeZone: TimeZone { clock.localTimeZone }
@@ -105,11 +167,15 @@ final class AppModel {
     /// Full range of the time travel slider: −24h … +24h.
     static let travelRange: ClosedRange<Double> = -24 * 60 ... 24 * 60
 
-    func resetTravel() { travelMinutes = 0 }
+    func resetTravel() {
+        travelMinutes = 0
+        pin = nil
+    }
 
-    /// Nudges the offset by whole hours, clamped to the slider's range.
+    /// Nudges the offset by whole hours, clamped to the slider's range. Starts
+    /// from what is on screen, so nudging a typed time moves on from that time.
     func nudgeTravel(hours: Int) {
-        let proposed = travelMinutes + Double(hours * 60)
+        let proposed = Double(travelOffsetMinutes + hours * 60)
         travelMinutes = min(max(proposed, Self.travelRange.lowerBound), Self.travelRange.upperBound)
     }
 
@@ -339,7 +405,7 @@ final class AppModel {
 
     func popoverDidDisappear() {
         isPopoverOpen = false
-        if preferences.travelResetsOnClose { travelMinutes = 0 }
+        if preferences.travelResetsOnClose { resetTravel() }
         syncClockGranularity()
     }
 
@@ -366,7 +432,7 @@ final class AppModel {
 
     /// Restores factory settings, including the starter zone list.
     func resetToDefaults() {
-        travelMinutes = 0
+        resetTravel()
         preferences = Preferences()
     }
 }

@@ -14,6 +14,15 @@ struct TimeZoneRow: View {
     /// Tints the row when this clock is one of the ones in the menu bar, so a
     /// glance at the panel answers "which of these am I looking at up there?"
     let isInMenuBar: Bool
+    /// Called with minutes from midnight when the user types a time into this
+    /// row. `nil` leaves the time read-only.
+    var onSetTime: ((Int) -> Void)?
+
+    @State private var isEditing = false
+    @State private var draft = ""
+    @State private var isInvalid = false
+    @State private var isHoveringTime = false
+    @FocusState private var isFieldFocused: Bool
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -54,9 +63,7 @@ struct TimeZoneRow: View {
             Spacer(minLength: 8)
 
             VStack(alignment: .trailing, spacing: 1) {
-                Text(timeText)
-                    .monospacedDigit()
-                    .fontWeight(.medium)
+                timeView
                 if let dayLabel {
                     Text(dayLabel)
                         .font(.caption2)
@@ -75,9 +82,77 @@ struct TimeZoneRow: View {
         .help(isInMenuBar
               ? String(localized: "Shown in the menu bar", comment: "Tooltip on a highlighted row")
               : "")
-        // Read as a single sentence by VoiceOver instead of five fragments.
-        .accessibilityElement(children: .ignore)
+        // Read as a single sentence by VoiceOver instead of five fragments —
+        // except while editing, when the field itself has to be reachable.
+        .accessibilityElement(children: isEditing ? .contain : .ignore)
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityAction(named: Text("Set a time here", comment: "Accessibility action")) {
+            beginEditing()
+        }
+    }
+
+    // MARK: - Typed time
+
+    /// The clock reading, which doubles as the place to type a time. Clicking it
+    /// is the shortest path from "they said 10:00" to seeing what that means
+    /// everywhere else — no slider to drag in 15-minute steps.
+    @ViewBuilder
+    private var timeView: some View {
+        if isEditing {
+            TextField(text: $draft, prompt: Text(verbatim: timeText)) {
+                Text("Time in \(row.title)", comment: "Accessibility label for the time field")
+            }
+            .textFieldStyle(.plain)
+            .monospacedDigit()
+            .fontWeight(.medium)
+            .multilineTextAlignment(.trailing)
+            .frame(width: 78)
+            .padding(.horizontal, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .strokeBorder(isInvalid ? Color.red : Color.accentColor, lineWidth: 1)
+            )
+            .focused($isFieldFocused)
+            .onSubmit(commit)
+            .onExitCommand { isEditing = false }
+            .onChange(of: draft) { _, _ in isInvalid = false }
+            // Clicking elsewhere abandons the edit rather than leaving a field open.
+            .onChange(of: isFieldFocused) { _, focused in if !focused { isEditing = false } }
+            .onAppear { isFieldFocused = true }
+        } else {
+            Button(action: beginEditing) {
+                Text(timeText)
+                    .monospacedDigit()
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 3)
+                    .background(
+                        isHoveringTime && onSetTime != nil ? Color.primary.opacity(0.08) : .clear,
+                        in: .rect(cornerRadius: 4)
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(onSetTime == nil)
+            .onHover { isHoveringTime = $0 }
+            .help(Text("Type a time in \(row.title) to see it everywhere",
+                       comment: "Tooltip on a row's time"))
+        }
+    }
+
+    private func beginEditing() {
+        guard onSetTime != nil, row.isAvailable else { return }
+        draft = ""
+        isInvalid = false
+        isEditing = true
+    }
+
+    private func commit() {
+        guard let minutes = TimeInput.minutes(from: draft) else {
+            // Stay open and say so, rather than silently doing nothing.
+            isInvalid = true
+            return
+        }
+        onSetTime?(minutes)
+        isEditing = false
     }
 
     /// Sun or moon, derived from the zone's own coordinates, so it needs no

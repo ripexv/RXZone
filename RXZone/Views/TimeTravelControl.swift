@@ -26,7 +26,7 @@ struct TimeTravelControl: View {
 
                 Spacer(minLength: 4)
 
-                Text(DateFormatting.travelLabel(minutes: Int(model.travelMinutes)))
+                Text(DateFormatting.travelLabel(minutes: model.travelOffsetMinutes))
                     .font(.caption)
                     .monospacedDigit()
                     .fontWeight(.medium)
@@ -57,7 +57,7 @@ struct TimeTravelControl: View {
                 }
                 .controlSize(.small)
                 .tint(model.isTimeTravelling ? Color.accentColor : Color.secondary)
-                .accessibilityValue(Text(DateFormatting.travelLabel(minutes: Int(model.travelMinutes))))
+                .accessibilityValue(Text(DateFormatting.travelLabel(minutes: model.travelOffsetMinutes)))
 
                 stepButton(hours: 1, symbol: "plus")
             }

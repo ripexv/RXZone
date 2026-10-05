@@ -493,7 +493,7 @@ private struct TimeTravelSettingsView: View {
 
             Section {
                 LabeledContent {
-                    Text(DateFormatting.travelLabel(minutes: Int(model.travelMinutes)))
+                    Text(DateFormatting.travelLabel(minutes: model.travelOffsetMinutes))
                         .monospacedDigit()
                 } label: {
                     Text("Current offset", comment: "Setting label")

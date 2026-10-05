@@ -71,7 +71,11 @@ struct MenuBarView: View {
             VStack(spacing: 0) {
                 // Only needed when the slider is collapsed; otherwise the
                 // control itself already states the offset.
-                if model.isTimeTravelling, !model.preferences.showsTimeTravel { travelBanner }
+                // A typed time always gets the banner, because it names the row and
+                // the time; the slider alone already shows a bare offset.
+                if model.pin != nil || (model.isTimeTravelling && !model.preferences.showsTimeTravel) {
+                    travelBanner
+                }
 
                 let inMenuBar = model.menuBarZoneIdentifiers
 
@@ -83,7 +87,10 @@ struct MenuBarView: View {
                                 date: model.displayDate,
                                 reference: model.referenceTimeZone,
                                 preferences: model.preferences,
-                                isInMenuBar: inMenuBar.contains(row.timeZone.identifier)
+                                isInMenuBar: inMenuBar.contains(row.timeZone.identifier),
+                                onSetTime: { minutes in
+                                    model.travel(toMinuteOfDay: minutes, in: row.timeZone, title: row.title)
+                                }
                             )
                             .padding(.horizontal, 8)
                             .contextMenu {
@@ -149,16 +156,38 @@ struct MenuBarView: View {
         HStack(spacing: 6) {
             Image(systemName: "clock.arrow.2.circlepath")
                 .imageScale(.small)
-            Text("Showing \(DateFormatting.travelLabel(minutes: Int(model.travelMinutes))) from now",
-                 comment: "Banner shown while time travelling")
+            bannerText
                 .font(.caption)
                 .fontWeight(.medium)
+                .lineLimit(1)
             Spacer(minLength: 0)
+            // The way back has to be right where the change is announced.
+            Button {
+                model.resetTravel()
+            } label: {
+                Text("Now", comment: "Returns from time travel to the present")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .buttonStyle(.borderless)
         }
         .foregroundStyle(Color.accentColor)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(Color.accentColor.opacity(0.12))
+    }
+
+    /// Names the typed time and the row it was typed into when there is one —
+    /// "10:00 in London" says far more than "+3h from now".
+    private var bannerText: Text {
+        let offset = DateFormatting.travelLabel(minutes: model.travelOffsetMinutes)
+        guard let pin = model.pin else {
+            return Text("Showing \(offset) from now", comment: "Banner shown while time travelling")
+        }
+        let time = DateFormatting.timeString(
+            for: pin.date, in: pin.timeZone, format: model.preferences.timeFormat)
+        return Text("\(time) in \(pin.title) · \(offset)",
+                    comment: "Banner after typing a time into a row: time, row name, offset from now")
     }
 
     private var emptyState: some View {
