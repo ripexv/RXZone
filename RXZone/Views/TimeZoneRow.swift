@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// One zone in the popover: emoji, name, the time, and optional date/offset.
+/// One zone in the popover. Who and where on the left, when on the right.
 struct TimeZoneRow: View {
     let row: ZoneRow
     let date: Date
@@ -19,29 +19,20 @@ struct TimeZoneRow: View {
     var onSetTime: ((Int) -> Void)?
 
     @State private var isEditing = false
-    @State private var draft = ""
-    @State private var isInvalid = false
-    @State private var isHoveringTime = false
-    @FocusState private var isFieldFocused: Bool
+    @State private var isHovering = false
 
     var body: some View {
-        HStack(alignment: .center, spacing: 10) {
-            Text(row.symbol)
-                .font(.title3)
-                // Emoji must not shrink when the row's text scales up.
-                .frame(minWidth: 24, minHeight: 22, alignment: .leading)
-                // Badged onto the symbol rather than placed before the name:
-                // it belongs to the place, and the title line stays a title.
-                .overlay(alignment: .bottomTrailing) { daylightBadge }
+        HStack(alignment: .center, spacing: 12) {
+            ZoneAvatar(row: row, size: PanelMetrics.avatar)
 
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
                     Text(row.title)
-                        .fontWeight(.medium)
+                        .font(.system(size: PanelMetrics.title, weight: .semibold))
                         .lineLimit(1)
-                    // The dedicated "This Mac" row is dropped when its zone is
-                    // already tracked, so mark the surviving row instead of
-                    // losing the information entirely.
+                    // The "This Mac" header is dropped when its zone is already
+                    // tracked, so mark the surviving row instead of losing the
+                    // information entirely.
                     if row.isSystemZone, !row.isLocal {
                         Image(systemName: "laptopcomputer")
                             .imageScale(.small)
@@ -54,15 +45,15 @@ struct TimeZoneRow: View {
                             .imageScale(.small)
                     }
                 }
-                Text(detail)
-                    .font(.caption)
+                Text(location)
+                    .font(.system(size: PanelMetrics.body))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                 // Present only in the week before a change, so most of the year
                 // the row is exactly as it was.
                 if let clockChange {
                     Text(clockChange)
-                        .font(.caption2)
+                        .font(.system(size: PanelMetrics.note, weight: .medium))
                         .foregroundStyle(.orange)
                         .lineLimit(1)
                 }
@@ -71,22 +62,28 @@ struct TimeZoneRow: View {
             Spacer(minLength: 8)
 
             VStack(alignment: .trailing, spacing: 1) {
-                timeView
-                if let dayLabel {
-                    Text(dayLabel)
-                        .font(.caption2)
+                EditableTime(
+                    text: timeText,
+                    font: .system(size: PanelMetrics.title, weight: .medium, design: .monospaced),
+                    placeName: row.title,
+                    onSetTime: row.isAvailable ? onSetTime : nil,
+                    isEditing: $isEditing
+                )
+                if let timeDetail {
+                    Text(timeDetail)
+                        .font(.system(size: PanelMetrics.body, design: .monospaced))
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
             }
         }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 6)
-        .background(
-            isInMenuBar ? Color.accentColor.opacity(0.12) : .clear,
-            in: .rect(cornerRadius: 6)
-        )
+        .padding(.vertical, 8)
+        .padding(.horizontal, PanelMetrics.edge - PanelMetrics.listInset)
+        .background { rowBackground }
         .opacity(row.isAvailable ? 1 : 0.5)
         .contentShape(.rect)
+        .onHover { isHovering = $0 }
+        .animation(.easeOut(duration: 0.12), value: isHovering)
         .help(isInMenuBar
               ? String(localized: "Shown in the menu bar", comment: "Tooltip on a highlighted row")
               : "")
@@ -95,89 +92,28 @@ struct TimeZoneRow: View {
         .accessibilityElement(children: isEditing ? .contain : .ignore)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityAction(named: Text("Set a time here", comment: "Accessibility action")) {
-            beginEditing()
+            if onSetTime != nil, row.isAvailable { isEditing = true }
         }
     }
 
-    // MARK: - Typed time
-
-    /// The clock reading, which doubles as the place to type a time. Clicking it
-    /// is the shortest path from "they said 10:00" to seeing what that means
-    /// everywhere else — no slider to drag in 15-minute steps.
+    /// The hovered row lifts into a card — the panel's own colour behind it,
+    /// a soft shadow under it — the way the rest of macOS raises the item
+    /// under the pointer. A row shown in the menu bar keeps its accent tint
+    /// underneath, so lifting it never hides that.
     @ViewBuilder
-    private var timeView: some View {
-        if isEditing {
-            TextField(text: $draft, prompt: Text(verbatim: timeText)) {
-                Text("Time in \(row.title)", comment: "Accessibility label for the time field")
+    private var rowBackground: some View {
+        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+        ZStack {
+            if isInMenuBar {
+                shape.fill(Color.accentColor.opacity(0.10))
             }
-            .textFieldStyle(.plain)
-            .monospacedDigit()
-            .fontWeight(.medium)
-            .multilineTextAlignment(.trailing)
-            .frame(width: 78)
-            .padding(.horizontal, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(isInvalid ? Color.red : Color.accentColor, lineWidth: 1)
-            )
-            .focused($isFieldFocused)
-            .onSubmit(commit)
-            .onExitCommand { isEditing = false }
-            .onChange(of: draft) { _, _ in isInvalid = false }
-            // Clicking elsewhere abandons the edit rather than leaving a field open.
-            .onChange(of: isFieldFocused) { _, focused in if !focused { isEditing = false } }
-            .onAppear { isFieldFocused = true }
-        } else {
-            Button(action: beginEditing) {
-                Text(timeText)
-                    .monospacedDigit()
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 3)
-                    .background(
-                        isHoveringTime && onSetTime != nil ? Color.primary.opacity(0.08) : .clear,
-                        in: .rect(cornerRadius: 4)
-                    )
+            if isHovering {
+                shape.fill(.background)
+                    .shadow(color: .black.opacity(0.08), radius: 6, y: 1)
+                if isInMenuBar {
+                    shape.fill(Color.accentColor.opacity(0.06))
+                }
             }
-            .buttonStyle(.plain)
-            .disabled(onSetTime == nil)
-            .onHover { isHoveringTime = $0 }
-            .help(Text("Type a time in \(row.title) to see it everywhere",
-                       comment: "Tooltip on a row's time"))
-        }
-    }
-
-    private func beginEditing() {
-        guard onSetTime != nil, row.isAvailable else { return }
-        draft = ""
-        isInvalid = false
-        isEditing = true
-    }
-
-    private func commit() {
-        guard let minutes = TimeInput.minutes(from: draft) else {
-            // Stay open and say so, rather than silently doing nothing.
-            isInvalid = true
-            return
-        }
-        onSetTime?(minutes)
-        isEditing = false
-    }
-
-    /// Sun or moon, derived from the zone's own coordinates, so it needs no
-    /// setting and holds at any latitude in any season. Carries a small opaque
-    /// disc behind it so it stays legible over whatever emoji it sits on.
-    @ViewBuilder
-    private var daylightBadge: some View {
-        if let isDaylight = row.isDaylight {
-            Image(systemName: isDaylight ? "sun.max.fill" : "moon.fill")
-                .font(.system(size: 8))
-                .foregroundStyle(isDaylight ? Color.orange : Color.indigo)
-                .padding(1.5)
-                .background(Circle().fill(.background))
-                .offset(x: 3, y: 2)
-                .help(isDaylight
-                      ? Text("Daytime there", comment: "Tooltip on the sun badge")
-                      : Text("Night there", comment: "Tooltip on the moon badge"))
         }
     }
 
@@ -192,24 +128,26 @@ struct TimeZoneRow: View {
         )
     }
 
-    /// Secondary line: the date, the offset from local, or both — falling back
-    /// to the zone's own name when the user has switched both off, so the row
-    /// never loses its second line entirely.
-    private var detail: String {
+    /// Under the name: where the row is, plus the full date when the user
+    /// has asked for it in Settings.
+    private var location: String {
+        guard preferences.showsDate else { return row.location }
+        return row.location + " · " + DateFormatting.dateString(for: date, in: row.timeZone)
+    }
+
+    /// Under the time: how far it is from yours, led by the day when the zone
+    /// sits on a different one — "Tomorrow · +9h". The day is the part people
+    /// get wrong, so it is kept even when the offset is switched off.
+    private var timeDetail: String? {
+        if row.isLocal {
+            return String(localized: "Local time", comment: "Under the time on the row for this Mac")
+        }
         var parts: [String] = []
-        // Only when the title is not already the city: a row renamed to "John"
-        // must still say Los Angeles somewhere, but an unrenamed row should not
-        // print the same word twice.
-        if !row.city.isEmpty, row.title != row.city {
-            parts.append(row.city)
-        }
-        if preferences.showsDate {
-            parts.append(DateFormatting.dateString(for: date, in: row.timeZone))
-        }
-        if preferences.showsOffsetFromLocal, !row.isLocal {
+        if let dayLabel { parts.append(dayLabel) }
+        if preferences.showsOffsetFromLocal {
             parts.append(DateFormatting.offsetLabel(of: row.timeZone, from: reference, at: date))
         }
-        return parts.isEmpty ? row.subtitle : parts.joined(separator: " · ")
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     private var clockChange: String? {
@@ -223,13 +161,13 @@ struct TimeZoneRow: View {
     }
 
     private var accessibilityLabel: Text {
-        var spoken = "\(row.title), \(timeText), \(detail)"
+        var spoken = "\(row.title), \(location), \(timeText)"
+        if let timeDetail { spoken += ", \(timeDetail)" }
         if let isDaylight = row.isDaylight {
             spoken += ", " + (isDaylight
                 ? String(localized: "daytime", comment: "Spoken status")
                 : String(localized: "night", comment: "Spoken status"))
         }
-        if let dayLabel { spoken += ", \(dayLabel)" }
         if let clockChange { spoken += ", \(clockChange)" }
         if isInMenuBar {
             spoken += ", " + String(localized: "shown in the menu bar",
@@ -239,5 +177,26 @@ struct TimeZoneRow: View {
             spoken += ", " + String(localized: "unavailable", comment: "Spoken for an unknown time zone")
         }
         return Text(spoken)
+    }
+}
+
+/// The row's emoji on its disc, set against the sky it has right now.
+struct ZoneAvatar: View {
+    let row: ZoneRow
+    let size: CGFloat
+
+    var body: some View {
+        EmojiDisc(symbol: row.symbol, size: size, sky: SkyScene(isDaylight: row.isDaylight))
+            .help(helpText)
+    }
+
+    /// Derived from the zone's own coordinates, so it holds at any latitude in
+    /// any season. No tooltip when the zone has no coordinates to reason from.
+    private var helpText: Text {
+        switch row.isDaylight {
+        case true?: Text("Daytime there", comment: "Tooltip on the sun badge")
+        case false?: Text("Night there", comment: "Tooltip on the moon badge")
+        case nil: Text(verbatim: "")
+        }
     }
 }

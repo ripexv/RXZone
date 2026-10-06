@@ -22,6 +22,8 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     /// Localized city for the zone, kept separate from `title`. Renaming a row
     /// to a person's name would otherwise erase every trace of where they are.
     let city: String
+    /// Localized country, e.g. "Poland". Empty for region-less zones like UTC.
+    let country: String
     let isLocal: Bool
     /// True when this row runs on the Mac's own time zone. Set on the pinned
     /// local row and on any saved zone that happens to match it, so the marker
@@ -33,6 +35,18 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     /// the zone has no known coordinates, so nothing is drawn rather than
     /// something guessed.
     let isDaylight: Bool?
+
+    /// Where the row is, for the line under its name: "Poland" for a row
+    /// that already reads Warsaw, "Los Angeles, United States" for one renamed
+    /// to a person. The city is left out only when the title already says it,
+    /// so nothing is printed twice and nothing is lost by renaming.
+    var location: String {
+        guard isAvailable else { return subtitle }
+        let parts = (title == city ? [] : [city]) + [country]
+        let joined = parts.filter { !$0.isEmpty }.joined(separator: ", ")
+        // Region-less zones such as UTC have no country to name.
+        return joined.isEmpty ? subtitle : joined
+    }
 
     /// Stable identity for the synthetic local row.
     static let localRowID = UUID(uuidString: "00000000-0000-0000-0000-00005A4F4E45")!
@@ -212,6 +226,7 @@ final class AppModel {
             title: String(localized: "This Mac", comment: "Row for the Mac's own time zone"),
             subtitle: TimeZoneCatalog.cityName(for: zone.identifier),
             city: TimeZoneCatalog.cityName(for: zone.identifier),
+            country: TimeZoneCatalog.entry(for: zone.identifier)?.country ?? "",
             isLocal: true,
             isSystemZone: true,
             isAvailable: true,
@@ -229,6 +244,7 @@ final class AppModel {
                 ? item.subtitle
                 : String(localized: "Unavailable on this Mac", comment: "Time zone identifier is unknown"),
             city: item.isAvailable ? TimeZoneCatalog.cityName(for: item.identifier) : "",
+            country: TimeZoneCatalog.entry(for: item.identifier)?.country ?? "",
             isLocal: false,
             isSystemZone: item.identifier == clock.localTimeZone.identifier,
             isAvailable: item.isAvailable,

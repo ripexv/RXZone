@@ -21,13 +21,13 @@ struct TimeTravelControl: View {
                     .foregroundStyle(model.isTimeTravelling ? Color.accentColor : .secondary)
 
                 Text("Time Travel", comment: "Section title for the time offset slider")
-                    .font(.caption)
+                    .font(.system(size: PanelMetrics.body))
                     .foregroundStyle(.secondary)
 
                 Spacer(minLength: 4)
 
                 Text(DateFormatting.travelLabel(minutes: model.travelOffsetMinutes))
-                    .font(.caption)
+                    .font(.system(size: PanelMetrics.body))
                     .monospacedDigit()
                     .fontWeight(.medium)
                     .foregroundStyle(model.isTimeTravelling ? Color.accentColor : .secondary)
@@ -69,8 +69,8 @@ struct TimeTravelControl: View {
             model.nudgeTravel(hours: hours)
         } label: {
             Image(systemName: symbol)
-                .imageScale(.small)
-                .frame(width: 14, height: 14)
+                .font(.system(size: PanelMetrics.body, weight: .semibold))
+                .frame(width: 18, height: 18)
         }
         .buttonStyle(.borderless)
         .accessibilityLabel(hours < 0

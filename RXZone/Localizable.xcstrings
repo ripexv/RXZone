@@ -471,6 +471,17 @@
         }
       }
     },
+    "Local time": {
+      "comment": "Under the time on the row for this Mac",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yerel saat"
+          }
+        }
+      }
+    },
     "Menu Bar": {
       "comment": "Settings tab",
       "localizations": {

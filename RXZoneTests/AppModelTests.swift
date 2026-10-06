@@ -499,3 +499,37 @@ struct AppModelPersistenceTests {
         #expect(model.preferences.zones.count == before)
     }
 }
+
+@Suite("Row location line")
+struct RowLocationTests {
+
+    private func row(_ identifier: String, label: String = "") -> ZoneRow {
+        let name = UUID().uuidString
+        let defaults = UserDefaults(suiteName: name)!
+        let model = AppModel(defaults: defaults)
+        model.preferences.zones = [TimeZoneItem(identifier: identifier, customLabel: label)]
+        defer { defaults.removePersistentDomain(forName: name) }
+        return model.rows.first { !$0.isLocal }!
+    }
+
+    @Test("An unrenamed row names its country, not its city a second time")
+    func unrenamed() {
+        let warsaw = row("Europe/Warsaw")
+        #expect(warsaw.title == "Warsaw")
+        #expect(warsaw.location == warsaw.country, "Got \(warsaw.location)")
+        #expect(!warsaw.location.contains("Warsaw"))
+    }
+
+    @Test("A renamed row keeps both the city and the country")
+    func renamed() {
+        let john = row("America/Los_Angeles", label: "John")
+        #expect(john.location.hasPrefix("Los Angeles, "), "Got \(john.location)")
+        #expect(john.location.contains(john.country))
+    }
+
+    @Test("A zone with no country falls back to its identifier rather than going blank")
+    func noCountry() {
+        let utc = row("UTC")
+        #expect(!utc.location.isEmpty)
+    }
+}

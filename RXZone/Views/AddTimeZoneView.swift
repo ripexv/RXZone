@@ -41,9 +41,10 @@ struct AddTimeZoneView: View {
                             resultRow(entry)
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, PanelMetrics.listInset)
+                    .padding(.vertical, 6)
                 }
-                .frame(height: 300)
+                .frame(height: Self.listHeight)
             }
         }
         .onAppear { isSearchFocused = true }
@@ -84,12 +85,13 @@ struct AddTimeZoneView: View {
                     .accessibilityLabel(Text("Clear search", comment: "Button"))
                 }
             }
-            .padding(.horizontal, 7)
-            .padding(.vertical, 5)
-            .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 6))
+            .font(.system(size: 14))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 8, style: .continuous))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, PanelMetrics.edge)
+        .padding(.vertical, 10)
     }
 
     private func resultRow(_ entry: TimeZoneCatalog.Entry) -> some View {
@@ -107,40 +109,17 @@ struct AddTimeZoneView: View {
             onSelect(entry.identifier, alias)
             onClose()
         } label: {
-            HStack(spacing: 10) {
-                Text(entry.symbol)
-                    .font(.title3)
-                    .frame(minWidth: 24, alignment: .leading)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
-                        .fontWeight(.medium)
-                        .lineLimit(1)
-                    Text(alias == nil
-                         ? subtitle(for: entry)
-                         : String(localized: "Same zone as \(entry.city)",
-                                  comment: "Shown when a searched city shares another city's time zone"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
-                Spacer(minLength: 8)
-
-                if isTracked {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(.secondary)
-                        .imageScale(.small)
-                } else {
-                    Text(time(for: entry))
-                        .font(.callout)
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .contentShape(.rect)
+            SearchResultRow(
+                symbol: entry.symbol,
+                title: title,
+                subtitle: alias == nil
+                    ? subtitle(for: entry)
+                    : String(localized: "Same zone as \(entry.city)",
+                             comment: "Shown when a searched city shares another city's time zone"),
+                time: time(for: entry),
+                isTracked: isTracked,
+                sky: SkyScene(isDaylight: SolarPosition.isDaylight(at: referenceDate, in: entry.identifier))
+            )
         }
         .buttonStyle(.plain)
         // The tooltip always names the real identifier, so the underlying zone
@@ -156,14 +135,18 @@ struct AddTimeZoneView: View {
     private var noResults: some View {
         VStack(spacing: 4) {
             Text("No matches", comment: "Empty search result title")
-                .fontWeight(.medium)
+                .font(.system(size: PanelMetrics.title, weight: .semibold))
             Text("Try a city, country, or region name.", comment: "Empty search result hint")
-                .font(.caption)
+                .font(.system(size: PanelMetrics.body))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 300)
+        .frame(height: Self.listHeight)
     }
+
+    /// Tall enough that the picker does not feel like a smaller window than
+    /// the clock list it was opened from.
+    private static let listHeight: CGFloat = 400
 
     private func subtitle(for entry: TimeZoneCatalog.Entry) -> String {
         entry.country.isEmpty ? entry.identifier : "\(entry.country) · \(entry.identifier)"
@@ -172,5 +155,59 @@ struct AddTimeZoneView: View {
     private func time(for entry: TimeZoneCatalog.Entry) -> String {
         guard let zone = TimeZone(identifier: entry.identifier) else { return "" }
         return DateFormatting.timeString(for: referenceDate, in: zone, format: timeFormat)
+    }
+}
+
+/// One search result, drawn at the same scale as a clock row — same disc,
+/// same type sizes, same lifted card on hover — so the picker reads as part of
+/// the panel rather than a smaller window inside it.
+private struct SearchResultRow: View {
+    let symbol: String
+    let title: String
+    let subtitle: String
+    let time: String
+    let isTracked: Bool
+    let sky: SkyScene?
+
+    @State private var isHovering = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            EmojiDisc(symbol: symbol, size: PanelMetrics.avatar, sky: sky)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: PanelMetrics.title, weight: .semibold))
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(.system(size: PanelMetrics.body))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 8)
+
+            if isTracked {
+                Image(systemName: "checkmark")
+                    .font(.system(size: PanelMetrics.body, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(time)
+                    .font(.system(size: PanelMetrics.title, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, PanelMetrics.edge - PanelMetrics.listInset)
+        .background {
+            if isHovering {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(.background)
+                    .shadow(color: .black.opacity(0.08), radius: 6, y: 1)
+            }
+        }
+        .contentShape(.rect)
+        .onHover { isHovering = $0 }
+        .animation(.easeOut(duration: 0.12), value: isHovering)
     }
 }
