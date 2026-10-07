@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import AppKit
 
 /// A clock reading that turns into a field when clicked, so a time can be typed
 /// straight into it. Shared by the rows and the header, so both behave alike.
@@ -45,6 +46,14 @@ struct EditableTime: View {
             .onChange(of: draft) { _, _ in isInvalid = false }
             // Clicking elsewhere abandons the edit rather than leaving a field open.
             .onChange(of: isFieldFocused) { _, focused in if !focused { isEditing = false } }
+            // Closing the panel only orders its window out, so the view and its
+            // state survive to the next opening — and the field with them. The
+            // window stops being key on the way out, and focus never changes, so
+            // that is the moment to put the time back.
+            .onReceive(NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification)) { _ in
+                isEditing = false
+            }
+            .onDisappear { isEditing = false }
             .onAppear {
                 draft = ""
                 isInvalid = false
@@ -72,6 +81,11 @@ struct EditableTime: View {
     }
 
     private func commit() {
+        // Return on an empty field is a way out, not a mistake.
+        if draft.trimmingCharacters(in: .whitespaces).isEmpty {
+            isEditing = false
+            return
+        }
         guard let minutes = TimeInput.minutes(from: draft) else {
             // Stay open and say so, rather than silently doing nothing.
             isInvalid = true

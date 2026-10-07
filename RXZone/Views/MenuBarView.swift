@@ -9,6 +9,7 @@ import AppKit
 /// Contents of the menu bar popover.
 struct MenuBarView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openSettings) private var openSettings
     @State private var isAdding = false
     /// Measured height of the clock list.
     ///
@@ -272,7 +273,7 @@ struct MenuBarView: View {
                 .help(Text("Time travel", comment: "Tooltip"))
                 .accessibilityLabel(Text("Time travel", comment: "Button"))
 
-                SettingsLink {
+                Button(action: showSettings) {
                     Image(systemName: "gearshape")
                 }
                 .help(Text("Settings", comment: "Tooltip"))
@@ -292,6 +293,21 @@ struct MenuBarView: View {
         .buttonStyle(.borderless)
         .padding(.horizontal, PanelMetrics.edge)
         .padding(.vertical, 10)
+    }
+
+    /// A menu bar app is never the active app on its own, so `SettingsLink`
+    /// alone opens the window behind whatever was in front. Activate first,
+    /// then lift the window once SwiftUI has created it.
+    private func showSettings() {
+        NSApplication.shared.activate()
+        openSettings()
+        DispatchQueue.main.async {
+            for window in NSApplication.shared.windows
+            where window.identifier?.rawValue == "com_apple_SwiftUI_Settings_window" {
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+            }
+        }
     }
 
     /// Puts the row's rendered time on the pasteboard — handy when scheduling.
