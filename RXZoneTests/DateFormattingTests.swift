@@ -131,6 +131,34 @@ struct DayDeltaTests {
         #expect(delta == 1)
     }
 
+    @Test("Every hour of a year agrees with the Gregorian calendar", arguments: [
+        ("Asia/Tokyo", "America/New_York"),
+        ("Pacific/Kiritimati", "Pacific/Pago_Pago"),
+        ("Asia/Kathmandu", "America/St_Johns"),
+        ("Europe/London", "Australia/Lord_Howe"),
+    ])
+    func matchesGregorianAllYear(zoneID: String, referenceID: String) {
+        // The reference answer: civil dates in a Gregorian calendar, whatever
+        // calendar the Mac running the tests happens to use.
+        func gregorianDay(_ date: Date, _ timeZone: TimeZone) -> Date {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = timeZone
+            let day = calendar.dateComponents([.year, .month, .day], from: date)
+            var utc = Calendar(identifier: .gregorian)
+            utc.timeZone = .gmt
+            return utc.date(from: day)!
+        }
+        let there = zone(zoneID), reference = zone(referenceID)
+        var date = Date(timeIntervalSince1970: 1_767_225_600) // 2026-01-01 UTC
+        var mismatches = 0
+        for _ in 0..<(365 * 24) {
+            let expected = Int(gregorianDay(date, there).timeIntervalSince(gregorianDay(date, reference)) / 86_400)
+            if DateFormatting.dayDelta(at: date, zone: there, reference: reference) != expected { mismatches += 1 }
+            date += 3600
+        }
+        #expect(mismatches == 0)
+    }
+
     @Test("Labels describe the difference in words", arguments: [
         (0, nil), (1, "Tomorrow"), (-1, "Yesterday"),
     ] as [(Int, String?)])

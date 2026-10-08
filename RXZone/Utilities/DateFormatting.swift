@@ -67,31 +67,21 @@ enum DateFormatting {
     /// How many calendar days the zone is ahead of (`+`) or behind (`-`) the
     /// reference zone at the same instant.
     ///
-    /// Compares calendar dates rather than elapsed time, so it stays correct
-    /// across DST transitions and sub-hour offsets.
+    /// Counts days on each zone's wall clock: the instant shifted by that zone's
+    /// offset at that moment, in whole days since 1970. Midnight is midnight in
+    /// every calendar, so the answer holds whatever calendar the Mac is set to.
+    /// An earlier version read year, month and day from the user's calendar and
+    /// then counted them as if they were Gregorian; under a Hebrew, Islamic,
+    /// Persian or Chinese calendar, whose months are not Gregorian months, a
+    /// zone a few hours ahead could read "+2 days" or "−29 days" at month ends.
     static func dayDelta(at date: Date, zone: TimeZone, reference: TimeZone) -> Int {
         guard zone.identifier != reference.identifier else { return 0 }
+        return wallClockDay(at: date, in: zone) - wallClockDay(at: date, in: reference)
+    }
 
-        var zoneCalendar = Calendar.current
-        zoneCalendar.timeZone = zone
-        var referenceCalendar = Calendar.current
-        referenceCalendar.timeZone = reference
-
-        let fields: Set<Calendar.Component> = [.year, .month, .day]
-        let zoneDay = zoneCalendar.dateComponents(fields, from: date)
-        let referenceDay = referenceCalendar.dateComponents(fields, from: date)
-
-        // Re-anchor both civil dates in a single fixed calendar so the
-        // difference is a pure day count, free of any zone's own offsets.
-        var anchor = Calendar(identifier: .gregorian)
-        anchor.timeZone = .gmt
-        guard let zoneAnchor = anchor.date(from: DateComponents(
-                  year: zoneDay.year, month: zoneDay.month, day: zoneDay.day)),
-              let referenceAnchor = anchor.date(from: DateComponents(
-                  year: referenceDay.year, month: referenceDay.month, day: referenceDay.day))
-        else { return 0 }
-
-        return anchor.dateComponents([.day], from: referenceAnchor, to: zoneAnchor).day ?? 0
+    private static func wallClockDay(at date: Date, in zone: TimeZone) -> Int {
+        let local = date.timeIntervalSince1970 + Double(zone.secondsFromGMT(for: date))
+        return Int((local / 86_400).rounded(.down))
     }
 
     /// Short marker for a zone sitting on a different calendar day, or `nil`
