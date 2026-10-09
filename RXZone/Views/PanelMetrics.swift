@@ -28,25 +28,13 @@ enum PanelMetrics {
     static let avatar: CGFloat = 40
 }
 
-/// Whether it is day or night where a zone is, drawn as the disc's backdrop.
-enum SkyScene: Equatable {
-    case day, night
-
-    /// `nil` when there are no coordinates to reason from; the disc then
-    /// stays plain rather than guess.
-    init?(isDaylight: Bool?) {
-        guard let isDaylight else { return nil }
-        self = isDaylight ? .day : .night
-    }
-}
-
 /// An emoji on a disc. Shared by the clock rows and the search results,
 /// so a zone looks the same before and after it is added.
 struct EmojiDisc: View {
     let symbol: String
     let size: CGFloat
-    /// The sky behind the emoji: clouds and a sun by day, a crescent moon and
-    /// stars by night. The circle itself carries the answer, so there is no
+    /// The sky behind the emoji: clouds and a sun by day, a low sun on an
+    /// orange horizon at sunrise and sunset, a crescent moon and stars by night. The circle itself carries the answer, so there is no
     /// badge sitting awkwardly on its edge.
     var sky: SkyScene?
 
@@ -61,8 +49,9 @@ struct EmojiDisc: View {
                     // Solid, not translucent: over the panel's blurred material
                     // a faint wash read as a hole.
                     Circle().fill(.background)
-                    SkyBackdrop(scene: .day).opacity(sky == .day ? 1 : 0)
-                    SkyBackdrop(scene: .night).opacity(sky == .night ? 1 : 0)
+                    SkyBackdrop(art: .day).opacity(sky == .day ? 1 : 0)
+                    SkyBackdrop(art: .twilight).opacity(sky?.isTwilight == true ? 1 : 0)
+                    SkyBackdrop(art: .night).opacity(sky == .night ? 1 : 0)
                 }
                 .clipShape(Circle())
                 .compositingGroup()
@@ -77,13 +66,17 @@ struct EmojiDisc: View {
 /// A tiny sky, drawn rather than made of emoji so it stays behind the zone's
 /// own symbol. Everything is kept to the rim: the middle belongs to the emoji.
 private struct SkyBackdrop: View {
-    let scene: SkyScene
+    /// Sunrise and sunset share one picture; the tooltip tells them apart.
+    enum Art { case day, twilight, night }
+
+    let art: Art
 
     var body: some View {
         Canvas { context, size in
             let w = size.width
-            switch scene {
+            switch art {
             case .day: Self.drawDay(in: &context, w: w)
+            case .twilight: Self.drawTwilight(in: &context, w: w)
             case .night: Self.drawNight(in: &context, w: w)
             }
         }
@@ -123,6 +116,41 @@ private struct SkyBackdrop: View {
         path.addPath(circle(at: CGPoint(x: c.x - wd * 0.16, y: c.y + h * 0.02), radius: wd * 0.2))
         path.addPath(circle(at: CGPoint(x: c.x + wd * 0.1, y: c.y - h * 0.08), radius: wd * 0.26))
         return path
+    }
+
+    // MARK: Twilight
+
+    private static func drawTwilight(in context: inout GraphicsContext, w: CGFloat) {
+        // Dusky violet overhead warming to orange at the horizon.
+        context.fill(Path(CGRect(x: 0, y: 0, width: w, height: w)),
+                     with: .linearGradient(
+                        Gradient(stops: [
+                            .init(color: Color(hue: 0.70, saturation: 0.55, brightness: 0.48), location: 0),
+                            .init(color: Color(hue: 0.95, saturation: 0.45, brightness: 0.88), location: 0.55),
+                            .init(color: Color(hue: 0.08, saturation: 0.70, brightness: 1.0), location: 0.85),
+                        ]),
+                        startPoint: CGPoint(x: w / 2, y: 0),
+                        endPoint: CGPoint(x: w / 2, y: w)))
+
+        // The first or last stars, high up and faint.
+        for star in [(0.24, 0.24, 0.018, 0.75), (0.42, 0.11, 0.013, 0.55), (0.14, 0.44, 0.012, 0.4)] {
+            context.fill(circle(at: CGPoint(x: star.0 * w, y: star.1 * w), radius: star.2 * w),
+                         with: .color(.white.opacity(star.3)))
+        }
+
+        // A large, low sun with a wide glow, half behind the horizon.
+        let sun = CGPoint(x: w * 0.74, y: w * 0.80)
+        context.fill(
+            circle(at: sun, radius: w * 0.32),
+            with: .radialGradient(
+                Gradient(colors: [Color(hue: 0.10, saturation: 0.7, brightness: 1).opacity(0.8), .clear]),
+                center: sun, startRadius: 0, endRadius: w * 0.32))
+        context.fill(circle(at: sun, radius: w * 0.13),
+                     with: .color(Color(hue: 0.11, saturation: 0.65, brightness: 1)))
+
+        // Horizon: a dark band the sun sinks behind.
+        context.fill(Path(CGRect(x: 0, y: w * 0.84, width: w, height: w * 0.16)),
+                     with: .color(Color(hue: 0.78, saturation: 0.45, brightness: 0.32)))
     }
 
     // MARK: Night

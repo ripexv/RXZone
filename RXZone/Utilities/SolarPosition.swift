@@ -30,6 +30,22 @@ nonisolated enum SolarPosition {
         return elevation(at: date, latitude: place.latitude, longitude: place.longitude) > horizon
     }
 
+    /// The sky over the zone: daylight, night, or the low-sun hour either side
+    /// of them. `nil` when the zone has no known coordinates.
+    ///
+    /// Twilight runs from civil dusk (6° below the horizon) to 4° above it —
+    /// roughly the golden hour on one side and the blue hour on the other,
+    /// close to an hour around each sunrise and sunset at mid latitudes.
+    static func sky(at date: Date, in timeZoneIdentifier: String) -> SkyScene? {
+        guard let place = TimeZoneCoordinates.byIdentifier[timeZoneIdentifier] else { return nil }
+        let now = elevation(at: date, latitude: place.latitude, longitude: place.longitude)
+        if now >= 4 { return .day }
+        if now <= -6 { return .night }
+        // Rising or setting: where the sun will be ten minutes from now.
+        let soon = elevation(at: date.addingTimeInterval(600), latitude: place.latitude, longitude: place.longitude)
+        return soon > now ? .sunrise : .sunset
+    }
+
     /// Sun's altitude above the horizon, in degrees. Negative means below it.
     static func elevation(at date: Date, latitude: Double, longitude: Double) -> Double {
         // Days since the J2000.0 epoch, 2000-01-01 12:00 UTC.
@@ -60,6 +76,13 @@ nonisolated enum SolarPosition {
             + cos(latitude) * cos(declination) * cos(hourAngle)
         return asin(min(max(sinElevation, -1), 1)).degrees
     }
+}
+
+/// What the sky looks like over a zone, drawn behind its emoji.
+nonisolated enum SkyScene: Hashable, Sendable {
+    case day, sunrise, sunset, night
+
+    var isTwilight: Bool { self == .sunrise || self == .sunset }
 }
 
 private nonisolated extension Double {

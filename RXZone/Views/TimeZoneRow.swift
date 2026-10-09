@@ -186,16 +186,18 @@ struct ZoneAvatar: View {
     let size: CGFloat
 
     var body: some View {
-        EmojiDisc(symbol: row.symbol, size: size, sky: SkyScene(isDaylight: row.isDaylight))
+        EmojiDisc(symbol: row.symbol, size: size, sky: row.sky)
             .help(helpText)
     }
 
     /// Derived from the zone's own coordinates, so it holds at any latitude in
     /// any season. No tooltip when the zone has no coordinates to reason from.
     private var helpText: Text {
-        switch row.isDaylight {
-        case true?: Text("Daytime there", comment: "Tooltip on the sun badge")
-        case false?: Text("Night there", comment: "Tooltip on the moon badge")
+        switch row.sky {
+        case .day?: Text("Daytime there", comment: "Tooltip on the sun badge")
+        case .sunrise?: Text("Sunrise there", comment: "Tooltip on a zone where the sun is rising")
+        case .sunset?: Text("Sunset there", comment: "Tooltip on a zone where the sun is setting")
+        case .night?: Text("Night there", comment: "Tooltip on the moon badge")
         case nil: Text(verbatim: "")
         }
     }

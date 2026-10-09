@@ -22,13 +22,9 @@ struct LocalClockHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 5) {
-                if let isDaylight = row.isDaylight {
-                    Image(systemName: isDaylight ? "sun.max.fill" : "moon.fill")
+                if let sky = row.sky {
+                    skyIcon(sky)
                         .font(.system(size: 10))
-                        .foregroundStyle(isDaylight ? Color.orange : Color.indigo)
-                        .help(isDaylight
-                              ? Text("Daytime there", comment: "Tooltip on the sun badge")
-                              : Text("Night there", comment: "Tooltip on the moon badge"))
                 }
                 Text(verbatim: "\(dateText) · \(row.city)")
                     .lineLimit(1)
@@ -69,6 +65,24 @@ struct LocalClockHeader: View {
         .accessibilityLabel(Text(verbatim: "\(row.title), \(row.city), \(timeText), \(dateText)"))
         .accessibilityAction(named: Text("Set a time here", comment: "Accessibility action")) {
             if onSetTime != nil { isEditing = true }
+        }
+    }
+
+    @ViewBuilder
+    private func skyIcon(_ sky: SkyScene) -> some View {
+        switch sky {
+        case .day:
+            Image(systemName: "sun.max.fill").foregroundStyle(.orange)
+                .help(Text("Daytime there", comment: "Tooltip on the sun badge"))
+        case .sunrise:
+            Image(systemName: "sunrise.fill").foregroundStyle(.orange)
+                .help(Text("Sunrise there", comment: "Tooltip on a zone where the sun is rising"))
+        case .sunset:
+            Image(systemName: "sunset.fill").foregroundStyle(.orange)
+                .help(Text("Sunset there", comment: "Tooltip on a zone where the sun is setting"))
+        case .night:
+            Image(systemName: "moon.fill").foregroundStyle(.indigo)
+                .help(Text("Night there", comment: "Tooltip on the moon badge"))
         }
     }
 

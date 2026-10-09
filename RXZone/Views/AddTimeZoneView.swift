@@ -118,7 +118,7 @@ struct AddTimeZoneView: View {
                              comment: "Shown when a searched city shares another city's time zone"),
                 time: time(for: entry),
                 isTracked: isTracked,
-                sky: SkyScene(isDaylight: SolarPosition.isDaylight(at: referenceDate, in: entry.identifier))
+                sky: SolarPosition.sky(at: referenceDate, in: entry.identifier)
             )
         }
         .buttonStyle(.plain)

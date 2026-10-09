@@ -35,6 +35,9 @@ nonisolated struct ZoneRow: Identifiable, Hashable, Sendable {
     /// the zone has no known coordinates, so nothing is drawn rather than
     /// something guessed.
     let isDaylight: Bool?
+    /// The sky drawn behind the emoji, with sunrise and sunset as phases of
+    /// their own. `nil` under the same condition as `isDaylight`.
+    let sky: SkyScene?
 
     /// Where the row is, for the line under its name: "Poland" for a row
     /// that already reads Warsaw, "Los Angeles, United States" for one renamed
@@ -230,7 +233,8 @@ final class AppModel {
             isLocal: true,
             isSystemZone: true,
             isAvailable: true,
-            isDaylight: SolarPosition.isDaylight(at: displayDate, in: zone.identifier)
+            isDaylight: SolarPosition.isDaylight(at: displayDate, in: zone.identifier),
+            sky: SolarPosition.sky(at: displayDate, in: zone.identifier)
         )
     }
 
@@ -250,7 +254,8 @@ final class AppModel {
             isAvailable: item.isAvailable,
             // Read from `displayDate`, so dragging the time travel slider walks
             // the sun across the list.
-            isDaylight: SolarPosition.isDaylight(at: displayDate, in: item.identifier)
+            isDaylight: SolarPosition.isDaylight(at: displayDate, in: item.identifier),
+            sky: SolarPosition.sky(at: displayDate, in: item.identifier)
         )
     }
 

@@ -1032,6 +1032,28 @@
         }
       }
     },
+    "Sunrise there": {
+      "comment": "Tooltip on a zone where the sun is rising",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orada gün doğuyor"
+          }
+        }
+      }
+    },
+    "Sunset there": {
+      "comment": "Tooltip on a zone where the sun is setting",
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orada gün batıyor"
+          }
+        }
+      }
+    },
     "System": {
       "comment": "Time format option",
       "localizations": {

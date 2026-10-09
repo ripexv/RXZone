@@ -95,6 +95,16 @@ struct SolarPositionTests {
         #expect(SolarPosition.isDaylight(at: moment, in: "Pacific/Auckland") == false)
     }
 
+    @Test("Sunrise and sunset get a sky of their own, either side of the horizon")
+    func twilightPhases() {
+        // London, midsummer: sunrise 03:43 UTC, sunset 20:21 UTC.
+        #expect(SolarPosition.sky(at: utc(2026, 6, 21, 12), in: "Europe/London") == .day)
+        #expect(SolarPosition.sky(at: utc(2026, 6, 21, 3, 40), in: "Europe/London") == .sunrise)
+        #expect(SolarPosition.sky(at: utc(2026, 6, 21, 20, 15), in: "Europe/London") == .sunset)
+        #expect(SolarPosition.sky(at: utc(2026, 6, 21, 23, 59), in: "Europe/London") == .night)
+        #expect(SolarPosition.sky(at: utc(2026, 6, 21, 12), in: "Mars/Olympus_Mons") == nil)
+    }
+
     @Test("Elevation stays inside the range an angle can occupy")
     func elevationIsBounded() {
         for hour in 0..<24 {
